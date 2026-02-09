@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyClone - 创始人资产管理版</title>
+<title>PolyClone v1.1 - 仓位管理版</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 .admin-border { border: 2px solid #a855f7; }
@@ -11,6 +11,7 @@
 .market-card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3); }
 .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #020617 100%); }
 .hidden { display: none; }
+.pos-card { border-left: 4px solid #3b82f6; }
 </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen gradient-bg font-sans">
@@ -18,66 +19,72 @@
 <nav class="border-b border-gray-800 p-4 flex justify-between items-center bg-gray-900/80 backdrop-blur-xl sticky top-0 z-50">
     <div class="flex items-center gap-2">
         <div class="w-8 h-8 bg-blue-600 rounded-lg rotate-45 shadow-lg shadow-blue-500/50"></div>
-        <span class="text-xl font-black tracking-tighter ml-2 italic text-blue-500">POLYCLONE</span>
+        <span class="text-xl font-black tracking-tighter ml-2 italic text-blue-500">POLYCLONE <span class="text-[10px] align-top text-gray-500">v1.1</span></span>
     </div>
     <div class="flex items-center gap-4">
         <div class="text-right">
-            <div id="addrDisplay" class="text-[10px] font-mono text-gray-500">Not Connected</div>
+            <div id="addrDisplay" class="text-[10px] font-mono text-gray-500 uppercase tracking-tighter">Not Connected</div>
             <div id="userBalance" class="text-sm font-black text-green-400">0.00 USDT</div>
         </div>
-        <button id="authBtn" onclick="openAuth()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs transition">LOGIN</button>
+        <button id="authBtn" onclick="openAuth()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs transition uppercase">Login</button>
     </div>
 </nav>
 
 <main class="max-w-4xl mx-auto p-6">
     <section id="depositPanel" class="hidden mb-8 p-6 bg-blue-600/5 border border-blue-500/20 rounded-3xl shadow-2xl">
-        <div class="flex justify-between mb-6 text-blue-400 font-bold">
-            <span>💎 CRYPTO DEPOSIT</span>
-            <button onclick="closeDeposit()">&times;</button>
+        <div class="flex justify-between mb-6 text-blue-400 font-black text-xs tracking-widest">
+            <span>💎 CRYPTO DEPOSIT SYSTEM</span>
+            <button onclick="closeDeposit()" class="hover:text-white transition">&times;</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div class="bg-black/60 p-4 rounded-2xl border border-gray-800">
-                <p class="text-[10px] text-gray-500 uppercase mb-2">ERC-20 Wallet Address</p>
-                <code id="walletAddr" class="text-[10px] text-blue-300 break-all leading-relaxed">0x...</code>
+            <div class="bg-black/60 p-5 rounded-2xl border border-gray-800">
+                <p class="text-[9px] text-gray-500 uppercase mb-2 font-bold tracking-widest">Receiver Wallet (ERC-20)</p>
+                <code id="walletAddr" class="text-[10px] text-blue-300 break-all leading-relaxed font-mono">0x...</code>
             </div>
             <div class="space-y-4">
-                <input id="depositAmount" type="number" placeholder="Amount (USDT)" class="w-full bg-black border border-gray-700 p-4 rounded-2xl outline-none focus:border-blue-500 text-green-400 font-mono">
-                <button onclick="processDeposit()" id="depBtn" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm uppercase">Confirm Deposit</button>
+                <input id="depositAmount" type="number" placeholder="Deposit Amount (USDT)" class="w-full bg-black border border-gray-700 p-4 rounded-2xl outline-none focus:border-blue-500 text-green-400 font-mono text-lg">
+                <button onclick="processDeposit()" id="depBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black text-sm uppercase tracking-tighter transition">Confirm & Transfer</button>
             </div>
         </div>
     </section>
 
-    <section id="adminPanel" class="hidden mb-10 p-6 bg-purple-900/10 border-2 border-purple-500/30 rounded-3xl">
-        <h2 class="text-purple-400 font-black mb-4 flex items-center gap-2">🛡️ SETTLEMENT SYSTEM (创始人)</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input id="marketInput" type="text" placeholder="新预测问题..." class="bg-black border border-gray-700 p-3 rounded-xl outline-none">
-            <button onclick="addMarket()" class="bg-purple-600 p-3 rounded-xl font-bold">发布新市场</button>
+    <section id="adminPanel" class="hidden mb-10 p-6 bg-purple-900/10 border-2 border-purple-500/30 rounded-[2rem]">
+        <h2 class="text-purple-400 font-black mb-6 flex items-center gap-2 italic">🛡️ MASTER CONTROL PANEL</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input id="marketInput" type="text" placeholder="输入新的预测市场问题..." class="md:col-span-3 bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-purple-500 text-sm">
+            <button onclick="addMarket()" class="bg-purple-600 hover:bg-purple-700 p-4 rounded-2xl font-black text-sm transition">PUBLISH</button>
         </div>
-        <div class="mt-4 text-[10px] text-purple-300/50 uppercase">注意：开奖功能目前通过手动指令执行</div>
     </section>
 
     <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-black italic tracking-widest text-white underline decoration-blue-500 decoration-4 underline-offset-8">MARKETS 🔥</h2>
-        <div class="flex gap-2">
-            <button onclick="openDeposit()" class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-xl text-xs font-bold text-blue-400 border border-blue-500/20">充值</button>
+        <h2 class="text-2xl font-black italic tracking-widest text-white underline decoration-blue-600 decoration-4 underline-offset-8">MARKETS 🔥</h2>
+        <button onclick="openDeposit()" class="bg-gray-900 hover:bg-gray-800 px-5 py-2.5 rounded-xl text-xs font-bold text-blue-400 border border-blue-500/30 transition shadow-lg">DEPOSIT</button>
+    </div>
+    <div id="marketList" class="grid grid-cols-1 gap-6 mb-16"></div>
+
+    <div class="mt-20 border-t border-gray-800 pt-10">
+        <h2 class="text-xl font-black italic mb-8 flex items-center gap-2">
+            <span class="w-2 h-6 bg-blue-600 inline-block"></span>
+            MY POSITIONS <span class="text-xs text-gray-600 not-italic ml-2 font-mono">TRACKING</span>
+        </h2>
+        <div id="posList" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium">
+            <div class="text-gray-700 italic text-sm">No active positions found...</div>
         </div>
     </div>
 
-    <div id="marketList" class="grid grid-cols-1 gap-6"></div>
-
-    <div class="mt-20 border-t border-gray-900 pt-10 text-center">
-        <p class="text-[10px] text-gray-700 uppercase tracking-[0.5em]">PolyClone Financial Engine v3.1 • 1991 EDITION</p>
+    <div class="mt-20 mb-10 text-center">
+        <p class="text-[9px] text-gray-700 uppercase tracking-[0.6em]">PolyClone Network • v1.1.1991 • Decentralized Oracle</p>
     </div>
 </main>
 
 <div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md p-6">
-    <div class="bg-gray-900 w-full max-w-sm p-8 rounded-[2.5rem] border border-gray-800">
-        <h2 class="text-2xl font-black mb-8 text-center text-blue-500">CRYPTO LOGIN</h2>
+    <div class="bg-gray-900 w-full max-w-sm p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl">
+        <h2 class="text-2xl font-black mb-8 text-center text-blue-500 italic tracking-tighter">SECURE ACCESS</h2>
         <div class="space-y-4">
-            <input id="uInput" type="text" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-600" placeholder="Username">
-            <input id="pInput" type="password" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-600" placeholder="Password (Complex)">
-            <button onclick="handleAuth()" class="w-full bg-blue-600 py-4 rounded-2xl font-black mt-4">VERIFY IDENTITY</button>
-            <button onclick="closeAuth()" class="w-full text-gray-600 text-xs mt-4">CANCEL</button>
+            <input id="uInput" type="text" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-600 font-bold" placeholder="Username">
+            <input id="pInput" type="password" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-600" placeholder="Identity Password">
+            <button onclick="handleAuth()" class="w-full bg-blue-600 py-4 rounded-2xl font-black mt-4 shadow-lg shadow-blue-500/30">CONFIRM SIGN-IN</button>
+            <button onclick="closeAuth()" class="w-full text-gray-600 text-[10px] font-bold mt-4 uppercase tracking-widest">Close</button>
         </div>
     </div>
 </div>
@@ -100,17 +107,17 @@ function processDeposit() {
     const amount = parseFloat(document.getElementById('depositAmount').value);
     const user = localStorage.getItem('pc_current_user');
     const btn = document.getElementById('depBtn');
-    if(!amount || amount <= 0) return;
+    if(!amount || amount <= 0) return alert("Enter valid amount");
     
-    btn.innerText = "WAITING FOR CONFIRMATION...";
+    btn.innerText = "LINKING TO BLOCKCHAIN...";
     btn.disabled = true;
 
     setTimeout(() => {
         let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`) || 0);
         localStorage.setItem(`pc_bal_${user}`, (bal + amount).toFixed(2));
-        alert(`DEPOSIT SUCCESS: +${amount} USDT`);
+        alert(`SUCCESS: ${amount} USDT ADDED`);
         location.reload();
-    }, 1500);
+    }, 1200);
 }
 
 function handleAuth() {
@@ -118,7 +125,7 @@ function handleAuth() {
     const pass = document.getElementById('pInput').value.trim();
     if(!name || !pass) return;
     const stored = localStorage.getItem(`pc_pwd_${name}`);
-    if (stored && stored !== pass) return alert("AUTH FAILED: WRONG PASSWORD");
+    if (stored && stored !== pass) return alert("ACCESS DENIED");
     if (!stored) {
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{8,16}$/;
         if(!regex.test(pass)) return alert("PASSWORD TOO WEAK");
@@ -128,34 +135,62 @@ function handleAuth() {
     location.reload();
 }
 
-function renderMarkets() {
+function renderUI() {
     const user = localStorage.getItem('pc_current_user');
     if(user) {
         const bal = localStorage.getItem(`pc_bal_${user}`) || "0.00";
         document.getElementById('userBalance').innerText = `${bal} USDT`;
-        document.getElementById('addrDisplay').innerText = `0x${btoa(user).substring(0,6)}...${user.substring(0,2)}`.toUpperCase();
-        document.getElementById('walletAddr').innerText = `0x${btoa(user).toLowerCase()}f32098485721098471928374912837`;
-        document.getElementById('authBtn').innerText = "LOGOUT";
+        document.getElementById('addrDisplay').innerText = `0x${btoa(user).substring(0,6).toUpperCase()}...${user.substring(0,2).toUpperCase()}`;
+        document.getElementById('walletAddr').innerText = `0x${btoa(user).toLowerCase()}e1d2c3b4a5f678901234567890abcdef`;
+        document.getElementById('authBtn').innerText = "EXIT";
         document.getElementById('authBtn').onclick = () => { localStorage.removeItem('pc_current_user'); location.reload(); };
         if(user === "admin1991") document.getElementById('adminPanel').classList.remove('hidden');
+        
+        // v1.1 渲染持仓
+        renderPositions(user);
     }
     
+    // 渲染市场
     const list = document.getElementById('marketList');
     list.innerHTML = markets.map(m => `
         <div class="market-card bg-gray-900/40 p-6 rounded-[2rem]">
             <div class="flex justify-between items-start mb-6">
-                <h3 class="text-lg font-bold text-gray-100 max-w-xs leading-tight">${m.question}</h3>
-                ${user === 'admin1991' ? `<button onclick="settleMarket(${m.id})" class="text-[10px] bg-purple-900/50 px-2 py-1 rounded border border-purple-500/50">结算</button>` : ''}
+                <h3 class="text-lg font-bold text-gray-100 max-w-xs leading-tight tracking-tight">${m.question}</h3>
+                ${user === 'admin1991' ? `<button onclick="settleMarket(${m.id})" class="text-[9px] bg-purple-900/30 px-3 py-1 rounded-full border border-purple-500/30 text-purple-400">SETTLE</button>` : ''}
             </div>
             <div class="flex gap-4">
-                <button onclick="bet('${user}', ${m.yesPrice}, 'YES', ${m.id})" class="flex-1 bg-green-500/10 border border-green-500/20 py-4 rounded-2xl hover:bg-green-500/20 transition group">
-                    <span class="block text-[10px] text-green-500 font-black mb-1 opacity-50">YES</span>
-                    <span class="text-xl font-mono text-green-400 font-bold">$${m.yesPrice}</span>
+                <button onclick="bet('${user}', ${m.yesPrice}, 'YES', ${m.id}, '${m.question.replace(/'/g, "\\'")}')" class="flex-1 bg-green-500/5 border border-green-500/20 py-4 rounded-2xl hover:bg-green-500/10 transition">
+                    <span class="block text-[9px] text-green-500 font-black mb-1 opacity-60 tracking-widest uppercase">Yes</span>
+                    <span class="text-xl font-mono text-green-400 font-black">$${m.yesPrice}</span>
                 </button>
-                <button onclick="bet('${user}', ${m.noPrice}, 'NO', ${m.id})" class="flex-1 bg-red-500/10 border border-red-500/20 py-4 rounded-2xl hover:bg-red-500/20 transition group">
-                    <span class="block text-[10px] text-red-500 font-black mb-1 opacity-50">NO</span>
-                    <span class="text-xl font-mono text-red-400 font-bold">$${m.noPrice}</span>
+                <button onclick="bet('${user}', ${m.noPrice}, 'NO', ${m.id}, '${m.question.replace(/'/g, "\\'")}')" class="flex-1 bg-red-500/5 border border-red-500/20 py-4 rounded-2xl hover:bg-red-500/10 transition">
+                    <span class="block text-[9px] text-red-500 font-black mb-1 opacity-60 tracking-widest uppercase">No</span>
+                    <span class="text-xl font-mono text-red-400 font-black">$${m.noPrice}</span>
                 </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// v1.1 新增持仓显示函数
+function renderPositions(user) {
+    const posList = document.getElementById('posList');
+    const positions = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
+    
+    if(positions.length === 0) {
+        posList.innerHTML = `<div class="text-gray-700 italic text-sm py-4 tracking-widest">NO ACTIVE POSITIONS FOUND IN THIS WALLET.</div>`;
+        return;
+    }
+
+    posList.innerHTML = positions.map(p => `
+        <div class="pos-card bg-gray-900/60 p-5 rounded-2xl border border-gray-800 flex justify-between items-center shadow-inner">
+            <div class="flex-1 mr-4">
+                <p class="text-[10px] text-gray-500 uppercase font-black mb-1 truncate w-40">${p.q}</p>
+                <span class="text-sm font-black italic ${p.side === 'YES' ? 'text-green-500' : 'text-red-500'}">${p.side}</span>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-500 font-bold mb-1">COST</p>
+                <p class="text-xs font-mono font-black text-gray-300">$${p.price} USDT</p>
             </div>
         </div>
     `).join('');
@@ -169,32 +204,29 @@ function addMarket() {
     location.reload();
 }
 
-function bet(user, price, side, mid) {
+function bet(user, price, side, mid, q) {
     if(!user || user === 'null') return openAuth();
     let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`) || 0);
-    if(bal < price) return alert("INSUFFICIENT BALANCE");
+    if(bal < price) return alert("INSUFFICIENT FUNDS");
     
-    if(confirm(`TRADE CONFIRMATION\nPAY: ${price} USDT\nBUY: ${side} SHARES`)) {
+    if(confirm(`EXECUTE TRADE?\n\nASSET: ${q}\nSIDE: ${side}\nCOST: ${price} USDT`)) {
         bal -= price;
         localStorage.setItem(`pc_bal_${user}`, bal.toFixed(2));
-        // 记录持仓
+        
         let positions = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
-        positions.push({ mid: mid, side: side, price: price });
+        positions.unshift({ mid: mid, side: side, price: price, q: q });
         localStorage.setItem(`pc_pos_${user}`, JSON.stringify(positions));
-        alert("EXECUTION SUCCESSFUL");
+        
+        alert("TRADE COMPLETED");
         location.reload();
     }
 }
 
-// 模拟结算 (创始人专用)
 function settleMarket(id) {
-    const winner = confirm("点击确定结算 YES 获胜，点击取消结算 NO 获胜") ? "YES" : "NO";
-    alert(`结算中：${winner} 为获胜方。持有该份额的用户将获得 $1.00 回报/每份。`);
-    // 这里未来可以增加自动分钱逻辑
+    alert("Settlement Module v1.1: Oracle input required to finalize contract outcome.");
 }
 
-window.onload = renderMarkets;
+window.onload = renderUI;
 </script>
 </body>
 </html>
- and
