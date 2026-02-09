@@ -3,148 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyClone v1.5 - 开发者权限版</title>
+<title>PolyClone v1.7 - 身份网关系统</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-    .market-card { transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid #1f2937; }
-    .market-card:hover { border-color: #60a5fa; background: rgba(30, 41, 59, 0.4); }
-    .gradient-bg { background: radial-gradient(circle at top right, #1e293b, #020617); }
-    .hidden { display: none; }
-    .admin-border { border: 1px solid #a855f7 !important; background: rgba(168, 85, 247, 0.05); }
+    .gateway-bg { background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); }
+    .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+    .hidden { display: none !important; }
+    .admin-mode { border-color: #a855f7 !important; box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
 </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen gradient-bg font-sans">
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
 
-<nav class="border-b border-gray-800 p-4 flex justify-between items-center bg-black/60 backdrop-blur-xl sticky top-0 z-50">
-    <div class="flex items-center gap-2">
-        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <span class="text-white font-black italic">P</span>
-        </div>
-        <div>
-            <span class="text-lg font-black italic text-white tracking-tighter block leading-none">POLYCLONE</span>
-            <span class="text-[9px] text-blue-500 font-bold tracking-[0.2em]">ADMIN CONSOLE v1.5</span>
-        </div>
-    </div>
-    <div class="flex gap-6 items-center">
-        <div class="text-right border-r border-gray-800 pr-4">
-            <div id="netWorth" class="text-sm font-black text-white">0.00</div>
-            <div class="text-[9px] text-gray-500 font-bold uppercase">Account Value</div>
-        </div>
-        <button id="authBtn" onclick="openAuth()" class="bg-blue-600 px-5 py-2 rounded-xl font-bold text-xs uppercase transition hover:bg-blue-500">Login</button>
-    </div>
-</nav>
-
-<main class="max-w-4xl mx-auto p-6">
-    <section id="adminPanel" class="hidden mb-10 p-8 rounded-[2.5rem] admin-border">
-        <div class="flex justify-between items-end mb-6">
-            <div>
-                <h2 class="text-purple-400 font-black italic text-xl">DEVELOPER VAULT</h2>
-                <p class="text-[10px] text-purple-300/50 font-bold uppercase tracking-widest">Protocol Fee Revenue</p>
+<div id="gatewaySection" class="fixed inset-0 z-[1000] gateway-bg flex items-center justify-center p-6 hidden">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-10">
+            <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto mb-6 flex items-center justify-center rotate-12 shadow-2xl shadow-blue-500/20">
+                <span class="text-white text-4xl font-black italic -rotate-12">P</span>
             </div>
-            <div class="text-right">
-                <div id="vaultAmt" class="text-3xl font-mono font-black text-purple-400">0.00</div>
-                <div class="text-[9px] text-gray-500 font-bold">ACCUMULATED USDT</div>
-            </div>
+            <h1 class="text-4xl font-black tracking-tighter italic mb-2">POLYCLONE</h1>
+            <p class="text-gray-500 font-bold text-xs uppercase tracking-[0.3em]">Predictive Markets Gateway</p>
         </div>
-        <button onclick="withdrawFees()" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-2xl font-black text-sm transition">CLAIM PROTOCOL REVENUE</button>
-    </section>
 
-    <div class="flex items-center justify-between mb-8">
-        <h2 class="text-xl font-black italic text-white flex items-center gap-3">
-            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-            ACTIVE MARKETS
-        </h2>
-        <div class="flex gap-2">
-            <button onclick="resetSystem()" class="text-[10px] font-black text-gray-600 hover:text-red-500 transition">DEBUG: RESET</button>
-        </div>
-    </div>
-    <div id="marketList" class="grid grid-cols-1 gap-4 mb-16"></div>
-
-    <div id="posSection" class="hidden">
-        <h2 class="text-xs font-black tracking-widest text-gray-500 uppercase mb-4 px-4">My Open Positions</h2>
-        <div id="posContainer" class="bg-gray-900/40 border border-gray-800 rounded-[2rem] overflow-hidden"></div>
-    </div>
-</main>
-
-<div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
-    <div class="bg-gray-900 w-full max-w-sm p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl">
-        <div class="text-center mb-8">
-            <h3 class="text-2xl font-black text-white italic">ACCESS POINT</h3>
-            <p class="text-[10px] text-gray-500 font-bold mt-2 uppercase">Identify yourself to the protocol</p>
-        </div>
-        <div class="space-y-4">
-            <div>
-                <label class="text-[10px] text-gray-500 font-black ml-2 uppercase">Account ID</label>
-                <input id="uName" type="text" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold" placeholder="e.g. admin1991">
+        <div class="glass p-8 rounded-[3rem] shadow-2xl" id="authBox">
+            <div class="flex gap-4 mb-8 p-1 bg-black/40 rounded-2xl">
+                <button onclick="switchAuth('login')" id="tabLogin" class="flex-1 py-3 rounded-xl text-xs font-black uppercase transition bg-gray-800 text-white">登录系统</button>
+                <button onclick="switchAuth('reg')" id="tabReg" class="flex-1 py-3 rounded-xl text-xs font-black uppercase transition text-gray-500">新户注册</button>
             </div>
-            <div>
-                <label class="text-[10px] text-gray-500 font-black ml-2 uppercase">Access Key</label>
-                <input id="uPass" type="password" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-500" placeholder="••••••••">
+
+            <div class="space-y-4">
+                <div class="relative">
+                    <input id="uName" type="text" oninput="checkAdmin(this.value)" class="w-full bg-black/60 border border-gray-800 p-5 rounded-2xl outline-none focus:border-blue-500 transition font-bold" placeholder="账户名">
+                    <div id="adminBadge" class="hidden absolute right-4 top-5 bg-purple-600 text-[8px] font-black px-2 py-1 rounded">FOUNDER</div>
+                </div>
+                <input id="uPass" type="password" class="w-full bg-black/60 border border-gray-800 p-5 rounded-2xl outline-none focus:border-blue-500 transition" placeholder="安全密钥">
+                
+                <button onclick="processAuth()" id="mainAuthBtn" class="w-full btn-primary py-5 rounded-2xl font-black text-sm uppercase tracking-widest mt-4">
+                    进入市场
+                </button>
             </div>
-            <button onclick="handleLogin()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition">INITIALIZE SESSION</button>
-            <button onclick="closeAuth()" class="w-full text-gray-600 text-[10px] font-bold uppercase mt-2">Return</button>
+            <p class="text-center text-gray-600 text-[10px] mt-6 font-bold uppercase tracking-tighter">
+                * 开发者请使用 admin1991 访问金库
+            </p>
         </div>
     </div>
 </div>
 
+<div id="mainSection" class="hidden">
+    <nav class="border-b border-gray-800 p-4 flex justify-between items-center bg-black/60 backdrop-blur-xl sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <span class="text-xl font-black italic text-white tracking-tighter">POLYCLONE</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right px-4 border-r border-gray-800">
+                <div id="userIdentity" class="text-[10px] font-black text-blue-500 uppercase">Trader</div>
+                <div id="userNameDisp" class="text-sm font-bold text-white">---</div>
+            </div>
+            <div class="text-right mr-4">
+                <div id="userBalance" class="text-sm font-black text-green-400">0.00</div>
+                <div class="text-[9px] text-gray-500 font-bold uppercase">Balance USDT</div>
+            </div>
+            <button onclick="logout()" class="bg-gray-800 p-3 rounded-xl hover:bg-red-900/30 transition group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-6">
+        <section id="adminPanel" class="hidden mb-10 p-8 rounded-[3rem] admin-mode bg-purple-900/10">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-purple-400 font-black italic text-xl uppercase tracking-tighter">Founder Vault</h2>
+                    <p class="text-[10px] text-purple-300/40 font-bold tracking-[0.3em]">REVENUE STREAM</p>
+                </div>
+                <div class="text-right">
+                    <div id="vaultAmt" class="text-4xl font-mono font-black text-purple-400">0.00</div>
+                    <span class="text-[9px] text-gray-500 font-bold">TOTAL COMMISSIONS</span>
+                </div>
+            </div>
+            <button onclick="claimFees()" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-2xl font-black text-sm transition uppercase">提取协议收入</button>
+        </section>
+
+        <h2 class="text-xs font-black tracking-[0.3em] text-gray-500 uppercase mb-6 flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+            实时交易市场
+        </h2>
+        <div id="marketList" class="grid grid-cols-1 gap-4 mb-16"></div>
+
+        <div id="posSection" class="hidden">
+            <h2 class="text-xs font-black tracking-[0.3em] text-gray-500 uppercase mb-6">我的活跃持仓</h2>
+            <div id="posContainer" class="bg-gray-900/60 border border-gray-800 rounded-[2.5rem] overflow-hidden"></div>
+        </div>
+    </main>
+</div>
+
 <script>
-// 初始化基础数据
-let markets = JSON.parse(localStorage.getItem('pc_markets_v15')) || [
-    { id: 1, question: "2026年人类会登上火星吗？", yesPrice: 0.18 },
-    { id: 2, question: "比特币会在2026年内触及 $150,000 吗？", yesPrice: 0.65 }
+// --- 系统逻辑 ---
+let currentMode = 'login';
+const markets = [
+    { id: 1, question: "2026年人类会登上火星吗？", yesPrice: 0.25 },
+    { id: 2, question: "比特币会在2026年内触及 $150,000 吗？", yesPrice: 0.72 }
 ];
 
-function openAuth() { document.getElementById('authModal').classList.remove('hidden'); }
-function closeAuth() { document.getElementById('authModal').classList.add('hidden'); }
+function checkAdmin(val) {
+    const badge = document.getElementById('adminBadge');
+    const authBox = document.getElementById('authBox');
+    if(val === 'admin1991') {
+        badge.classList.remove('hidden');
+        authBox.classList.add('admin-mode');
+    } else {
+        badge.classList.add('hidden');
+        authBox.classList.remove('admin-mode');
+    }
+}
 
-function handleLogin() {
+function switchAuth(mode) {
+    currentMode = mode;
+    document.getElementById('tabLogin').className = mode === 'login' ? 'flex-1 py-3 rounded-xl text-xs font-black uppercase transition bg-gray-800 text-white' : 'flex-1 py-3 rounded-xl text-xs font-black uppercase transition text-gray-500';
+    document.getElementById('tabReg').className = mode === 'reg' ? 'flex-1 py-3 rounded-xl text-xs font-black uppercase transition bg-gray-800 text-white' : 'flex-1 py-3 rounded-xl text-xs font-black uppercase transition text-gray-500';
+    document.getElementById('mainAuthBtn').innerText = mode === 'login' ? '确认登录' : '创建新账户';
+}
+
+function processAuth() {
     const user = document.getElementById('uName').value.trim();
     const pass = document.getElementById('uPass').value.trim();
-    if(!user || !pass) return alert("字段不能为空");
+    if(!user || !pass) return alert("请输入完整凭证");
 
-    // 存储/校验逻辑
-    const storedPass = localStorage.getItem(`pc_key_${user}`);
-    if (storedPass && storedPass !== pass) return alert("身份验证失败：密钥错误");
-    if (!storedPass) localStorage.setItem(`pc_key_${user}`, pass);
-
-    localStorage.setItem('pc_session', user);
-    if (!localStorage.getItem(`pc_bal_${user}`)) localStorage.setItem(`pc_bal_${user}`, "100.00");
+    const storedPass = localStorage.getItem(`v17_key_${user}`);
     
+    if(currentMode === 'login') {
+        if(!storedPass) return alert("账户不存在，请先注册");
+        if(storedPass !== pass) return alert("密钥验证失败");
+    } else {
+        if(storedPass) return alert("该账户名已被占用");
+        localStorage.setItem(`v17_key_${user}`, pass);
+        localStorage.setItem(`v17_bal_${user}`, user === 'admin1991' ? "10000.00" : "1000.00");
+    }
+
+    localStorage.setItem('v17_session', user);
     location.reload();
 }
 
 function render() {
-    const user = localStorage.getItem('pc_session');
+    const user = localStorage.getItem('v17_session');
     if(!user) {
-        document.getElementById('authBtn').innerText = "CONNECT";
-        renderMarkets(null);
+        document.getElementById('gatewaySection').classList.remove('hidden');
+        document.getElementById('mainSection').classList.add('hidden');
         return;
     }
 
-    // 开发者特权：admin1991
-    if(user === "admin1991") {
+    document.getElementById('gatewaySection').classList.add('hidden');
+    document.getElementById('mainSection').classList.remove('hidden');
+    document.getElementById('userNameDisp').innerText = user;
+
+    if(user === 'admin1991') {
         document.getElementById('adminPanel').classList.remove('hidden');
-        const fees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
+        document.getElementById('userIdentity').innerText = "SYSTEM FOUNDER";
+        document.getElementById('userIdentity').className = "text-[10px] font-black text-purple-500 uppercase";
+        const fees = parseFloat(localStorage.getItem('v17_fees') || 0);
         document.getElementById('vaultAmt').innerText = fees.toFixed(2);
     }
 
-    const bal = parseFloat(localStorage.getItem(`pc_bal_${user}`) || 0);
-    const pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
-    
-    let posValue = 0;
-    pos.forEach(p => {
-        const m = markets.find(x => x.id === p.mid);
-        const curPrice = p.side === 'YES' ? m.yesPrice : (1 - m.yesPrice);
-        posValue += curPrice * p.shares;
-    });
+    const bal = parseFloat(localStorage.getItem(`v17_bal_${user}`) || 0);
+    document.getElementById('userBalance').innerText = bal.toFixed(2);
 
-    document.getElementById('netWorth').innerText = (bal + posValue).toFixed(2) + " USDT";
-    document.getElementById('authBtn').innerText = user.toUpperCase() + " (LOGOUT)";
-    document.getElementById('authBtn').onclick = () => { localStorage.removeItem('pc_session'); location.reload(); };
-    
-    document.getElementById('posSection').classList.remove('hidden');
     renderMarkets(user);
-    renderPositions(user, pos);
+    renderPositions(user);
 }
 
 function renderMarkets(user) {
@@ -152,16 +179,16 @@ function renderMarkets(user) {
     list.innerHTML = markets.map(m => {
         const noP = (1 - m.yesPrice).toFixed(2);
         return `
-        <div class="market-card p-6 rounded-3xl flex flex-col md:flex-row items-center gap-6">
-            <h3 class="flex-1 font-bold text-gray-200 text-sm">${m.question}</h3>
-            <div class="flex gap-2">
-                <button onclick="buy('${user}', ${m.id}, 'YES', ${m.yesPrice})" class="bg-green-500/10 border border-green-500/20 px-6 py-3 rounded-2xl hover:bg-green-500/20 transition text-center">
-                    <span class="block text-[8px] text-green-500 font-black uppercase mb-1">Buy Yes</span>
-                    <span class="text-lg font-mono font-black text-green-400">$${m.yesPrice.toFixed(2)}</span>
+        <div class="glass p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 mb-4">
+            <h3 class="flex-1 font-bold text-lg">${m.question}</h3>
+            <div class="flex gap-4">
+                <button onclick="buy('${user}', ${m.id}, 'YES', ${m.yesPrice})" class="bg-green-500/10 border border-green-500/20 p-6 rounded-3xl hover:bg-green-500/20 transition text-center min-w-[120px]">
+                    <span class="block text-[9px] text-green-500 font-black uppercase mb-2">Buy Yes</span>
+                    <span class="text-2xl font-mono font-black text-green-400">$${m.yesPrice.toFixed(2)}</span>
                 </button>
-                <button onclick="buy('${user}', ${m.id}, 'NO', ${noP})" class="bg-red-500/10 border border-red-500/20 px-6 py-3 rounded-2xl hover:bg-red-500/20 transition text-center">
-                    <span class="block text-[8px] text-red-500 font-black uppercase mb-1">Buy No</span>
-                    <span class="text-lg font-mono font-black text-red-400">$${noP}</span>
+                <button onclick="buy('${user}', ${m.id}, 'NO', ${noP})" class="bg-red-500/10 border border-red-500/20 p-6 rounded-3xl hover:bg-red-500/20 transition text-center min-w-[120px]">
+                    <span class="block text-[9px] text-red-500 font-black uppercase mb-2">Buy No</span>
+                    <span class="text-2xl font-mono font-black text-red-400">$${noP}</span>
                 </button>
             </div>
         </div>`;
@@ -169,96 +196,59 @@ function renderMarkets(user) {
 }
 
 function buy(user, mid, side, price) {
-    if(!user) return openAuth();
-    const amt = prompt("投入金额 (USDT):", "10");
+    const amt = prompt("投入交易金额 (USDT):", "100");
     if(!amt || isNaN(amt) || amt <= 0) return;
 
-    let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`));
+    let bal = parseFloat(localStorage.getItem(`v17_bal_${user}`));
     if(bal < amt) return alert("余额不足");
 
-    // 1% 手续费
     const fee = amt * 0.01;
     const net = amt - fee;
-    const totalFees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
-    localStorage.setItem('pc_protocol_fees', (totalFees + fee).toFixed(2));
+    const totalFees = parseFloat(localStorage.getItem('v17_fees') || 0);
+    localStorage.setItem('v17_fees', (totalFees + fee).toFixed(2));
 
-    // AMM 逻辑
-    const mIdx = markets.findIndex(m => m.id === mid);
-    const impact = net / 1500;
-    const shares = net / (price + (impact/2));
+    const shares = net / price;
+    localStorage.setItem(`v17_bal_${user}`, (bal - amt).toFixed(2));
     
-    if(side === 'YES') markets[mIdx].yesPrice = Math.min(0.98, markets[mIdx].yesPrice + impact);
-    else markets[mIdx].yesPrice = Math.max(0.02, markets[mIdx].yesPrice - impact);
-
-    localStorage.setItem(`pc_bal_${user}`, (bal - amt).toFixed(2));
-    let pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
+    let pos = JSON.parse(localStorage.getItem(`v17_pos_${user}`)) || [];
     pos.unshift({ id: Date.now(), mid: mid, side: side, shares: shares, price: price });
-    localStorage.setItem(`pc_pos_${user}`, JSON.stringify(pos));
-    localStorage.setItem('pc_markets_v15', JSON.stringify(markets));
-    location.reload();
-}
-
-function withdrawFees() {
-    const user = localStorage.getItem('pc_session');
-    const fees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
-    if(fees <= 0) return alert("没有可提取收益");
+    localStorage.setItem(`v17_pos_${user}`, JSON.stringify(pos));
     
-    let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`));
-    localStorage.setItem(`pc_bal_${user}`, (bal + fees).toFixed(2));
-    localStorage.setItem('pc_protocol_fees', "0.00");
-    alert("收益已成功提取至开发者余额！");
     location.reload();
 }
 
-function renderPositions(user, pos) {
+function renderPositions(user) {
     const container = document.getElementById('posContainer');
-    if(pos.length === 0) {
-        container.innerHTML = `<p class="p-10 text-center text-gray-700 text-[10px] font-black uppercase tracking-widest">Market Neutral</p>`;
-        return;
-    }
+    const pos = JSON.parse(localStorage.getItem(`v17_pos_${user}`)) || [];
+    if(pos.length > 0) document.getElementById('posSection').classList.remove('hidden');
+
     container.innerHTML = pos.map(p => {
         const m = markets.find(x => x.id === p.mid);
-        const curPrice = p.side === 'YES' ? m.yesPrice : (1 - m.yesPrice);
-        const pnl = (p.shares * (curPrice - p.price)).toFixed(2);
         return `
-        <div class="p-6 border-b border-gray-800/50 flex items-center justify-between">
-            <div class="flex-1">
-                <div class="text-[10px] text-gray-500 font-black mb-1">${m.question}</div>
-                <div class="text-xs font-black ${p.side === 'YES' ? 'text-green-500' : 'text-red-500'}">${p.side} ${p.shares.toFixed(2)} 份</div>
+        <div class="p-8 border-b border-gray-800/50 flex items-center justify-between hover:bg-white/[0.02] transition">
+            <div>
+                <div class="text-[10px] text-gray-500 font-black mb-2 uppercase tracking-widest">${m.question}</div>
+                <div class="text-sm font-black uppercase ${p.side === 'YES' ? 'text-green-400' : 'text-red-400'}">${p.side} · ${p.shares.toFixed(2)} SHARES</div>
             </div>
-            <div class="text-right mr-8">
-                <div class="text-sm font-mono font-black ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}">${pnl >= 0 ? '+' : ''}${pnl}</div>
-                <div class="text-[8px] text-gray-600 font-bold uppercase tracking-widest">PnL</div>
-            </div>
-            <button onclick="sellAsset('${user}', ${p.id}, ${curPrice})" class="bg-gray-800 px-4 py-2 rounded-xl text-[10px] font-black hover:bg-white hover:text-black transition">SELL</button>
+            <button onclick="alert('结算功能将在 v1.8 开启实时波动后启用')" class="bg-gray-800 px-6 py-3 rounded-2xl text-xs font-black hover:bg-white hover:text-black transition">HOLDING</button>
         </div>`;
     }).join('');
 }
 
-function sellAsset(user, pid, curPrice) {
-    let pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`));
-    const p = pos.find(x => x.id === pid);
-    const m = markets.find(x => x.id === p.mid);
-    
-    const gross = p.shares * curPrice;
-    const fee = gross * 0.01;
-    const totalFees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
-    localStorage.setItem('pc_protocol_fees', (totalFees + fee).toFixed(2));
-
-    let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`));
-    localStorage.setItem(`pc_bal_${user}`, (bal + (gross - fee)).toFixed(2));
-    
-    // 反向价格影响
-    const impact = gross / 1500;
-    if(p.side === 'YES') m.yesPrice = Math.max(0.02, m.yesPrice - impact);
-    else m.yesPrice = Math.min(0.98, m.yesPrice + impact);
-
-    localStorage.setItem(`pc_pos_${user}`, JSON.stringify(pos.filter(x => x.id !== pid)));
-    localStorage.setItem('pc_markets_v15', JSON.stringify(markets));
+function claimFees() {
+    const user = localStorage.getItem('v17_session');
+    const fees = parseFloat(localStorage.getItem('v17_fees') || 0);
+    if(fees <= 0) return alert("暂无利润");
+    let bal = parseFloat(localStorage.getItem(`v17_bal_${user}`));
+    localStorage.setItem(`v17_bal_${user}`, (bal + fees).toFixed(2));
+    localStorage.setItem('v17_fees', "0.00");
     location.reload();
 }
 
-function resetSystem() { if(confirm("此操作将清除所有用户和交易数据！确认？")) { localStorage.clear(); location.reload(); } }
+function logout() {
+    localStorage.removeItem('v17_session');
+    location.reload();
+}
 
 window.onload = render;
 </script>
