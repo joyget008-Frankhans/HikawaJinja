@@ -3,111 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyClone v1.4 - 开发者金库版</title>
+<title>PolyClone v1.5 - 开发者权限版</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
     .market-card { transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid #1f2937; }
     .market-card:hover { border-color: #60a5fa; background: rgba(30, 41, 59, 0.4); }
     .gradient-bg { background: radial-gradient(circle at top right, #1e293b, #020617); }
     .hidden { display: none; }
-    .admin-glow { box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); border: 1px solid #a855f7 !important; }
+    .admin-border { border: 1px solid #a855f7 !important; background: rgba(168, 85, 247, 0.05); }
 </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen gradient-bg font-sans">
 
 <nav class="border-b border-gray-800 p-4 flex justify-between items-center bg-black/60 backdrop-blur-xl sticky top-0 z-50">
     <div class="flex items-center gap-2">
-        <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
             <span class="text-white font-black italic">P</span>
         </div>
         <div>
             <span class="text-lg font-black italic text-white tracking-tighter block leading-none">POLYCLONE</span>
-            <span class="text-[9px] text-purple-500 font-bold tracking-[0.2em]">TREASURY v1.4</span>
+            <span class="text-[9px] text-blue-500 font-bold tracking-[0.2em]">ADMIN CONSOLE v1.5</span>
         </div>
     </div>
     <div class="flex gap-6 items-center">
         <div class="text-right border-r border-gray-800 pr-4">
             <div id="netWorth" class="text-sm font-black text-white">0.00</div>
-            <div class="text-[9px] text-gray-500 font-bold uppercase">Net Worth (USDT)</div>
+            <div class="text-[9px] text-gray-500 font-bold uppercase">Account Value</div>
         </div>
-        <div class="text-right">
-            <div id="userBalance" class="text-sm font-black text-green-400">0.00</div>
-            <div id="addrDisplay" class="text-[9px] font-mono text-gray-600 uppercase">Not Connected</div>
-        </div>
+        <button id="authBtn" onclick="openAuth()" class="bg-blue-600 px-5 py-2 rounded-xl font-bold text-xs uppercase transition hover:bg-blue-500">Login</button>
     </div>
 </nav>
 
 <main class="max-w-4xl mx-auto p-6">
-    
-    <section id="adminVaultPanel" class="hidden mb-10 p-8 bg-purple-900/10 border-2 border-purple-500/30 rounded-[2.5rem] admin-glow">
-        <div class="flex justify-between items-center mb-6">
+    <section id="adminPanel" class="hidden mb-10 p-8 rounded-[2.5rem] admin-border">
+        <div class="flex justify-between items-end mb-6">
             <div>
-                <h2 class="text-purple-400 font-black italic text-xl tracking-tighter">FOUNDER TREASURY</h2>
-                <p class="text-[10px] text-purple-300/50 uppercase font-bold tracking-widest">系统手续费实时统计</p>
+                <h2 class="text-purple-400 font-black italic text-xl">DEVELOPER VAULT</h2>
+                <p class="text-[10px] text-purple-300/50 font-bold uppercase tracking-widest">Protocol Fee Revenue</p>
             </div>
             <div class="text-right">
-                <div id="vaultAmount" class="text-2xl font-mono font-black text-purple-400">0.00</div>
-                <div class="text-[9px] text-gray-500 font-bold uppercase">累计待提取收益 (USDT)</div>
+                <div id="vaultAmt" class="text-3xl font-mono font-black text-purple-400">0.00</div>
+                <div class="text-[9px] text-gray-500 font-bold">ACCUMULATED USDT</div>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button onclick="withdrawTreasury()" class="bg-purple-600 hover:bg-purple-500 py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-purple-900/20">提现至我的余额</button>
-            <div class="bg-black/40 border border-purple-500/20 rounded-2xl p-4 flex items-center justify-center">
-                <span class="text-[10px] text-purple-300 font-bold">当前费率: 1.0% (FIXED)</span>
-            </div>
-        </div>
+        <button onclick="withdrawFees()" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-2xl font-black text-sm transition">CLAIM PROTOCOL REVENUE</button>
     </section>
 
     <div class="flex items-center justify-between mb-8">
-        <h2 class="text-xl font-black italic text-white flex items-center gap-2 uppercase tracking-tighter">Trading Floor</h2>
+        <h2 class="text-xl font-black italic text-white flex items-center gap-3">
+            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+            ACTIVE MARKETS
+        </h2>
         <div class="flex gap-2">
-            <button onclick="openDeposit()" class="text-[10px] font-black bg-blue-600/10 text-blue-500 border border-blue-500/30 px-4 py-2 rounded-lg hover:bg-blue-600/20 transition">DEPOSIT</button>
+            <button onclick="resetSystem()" class="text-[10px] font-black text-gray-600 hover:text-red-500 transition">DEBUG: RESET</button>
         </div>
     </div>
     <div id="marketList" class="grid grid-cols-1 gap-4 mb-16"></div>
 
-    <div class="bg-gray-900/40 border border-gray-800 rounded-[2rem] overflow-hidden">
-        <div class="p-6 border-b border-gray-800">
-            <h2 class="text-xs font-black tracking-widest text-gray-400 uppercase">Portfolio Assets</h2>
-        </div>
-        <div id="posContainer"></div>
+    <div id="posSection" class="hidden">
+        <h2 class="text-xs font-black tracking-widest text-gray-500 uppercase mb-4 px-4">My Open Positions</h2>
+        <div id="posContainer" class="bg-gray-900/40 border border-gray-800 rounded-[2rem] overflow-hidden"></div>
     </div>
 </main>
 
-<div id="depositModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm">
-    <div class="bg-gray-900 w-full max-w-sm p-8 rounded-[2.5rem] border border-gray-800">
-        <h3 class="text-xl font-black text-white mb-6 uppercase italic">Fund Wallet</h3>
-        <input id="depAmt" type="number" placeholder="Enter Amount" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none text-green-400 font-mono text-xl mb-6">
-        <button onclick="confirmDeposit()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm shadow-xl shadow-blue-500/20">CONFIRM</button>
-        <button onclick="closeDeposit()" class="w-full text-gray-600 text-[10px] font-bold mt-6 uppercase">Cancel</button>
+<div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+    <div class="bg-gray-900 w-full max-w-sm p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl">
+        <div class="text-center mb-8">
+            <h3 class="text-2xl font-black text-white italic">ACCESS POINT</h3>
+            <p class="text-[10px] text-gray-500 font-bold mt-2 uppercase">Identify yourself to the protocol</p>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] text-gray-500 font-black ml-2 uppercase">Account ID</label>
+                <input id="uName" type="text" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold" placeholder="e.g. admin1991">
+            </div>
+            <div>
+                <label class="text-[10px] text-gray-500 font-black ml-2 uppercase">Access Key</label>
+                <input id="uPass" type="password" class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-blue-500" placeholder="••••••••">
+            </div>
+            <button onclick="handleLogin()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition">INITIALIZE SESSION</button>
+            <button onclick="closeAuth()" class="w-full text-gray-600 text-[10px] font-bold uppercase mt-2">Return</button>
+        </div>
     </div>
 </div>
 
 <script>
-// 系统配置
-const FEE_RATE = 0.01; 
-
-let markets = JSON.parse(localStorage.getItem('pc_markets_v14')) || [
+// 初始化基础数据
+let markets = JSON.parse(localStorage.getItem('pc_markets_v15')) || [
     { id: 1, question: "2026年人类会登上火星吗？", yesPrice: 0.18 },
     { id: 2, question: "比特币会在2026年内触及 $150,000 吗？", yesPrice: 0.65 }
 ];
 
-function openDeposit() { document.getElementById('depositModal').classList.remove('hidden'); }
-function closeDeposit() { document.getElementById('depositModal').classList.add('hidden'); }
+function openAuth() { document.getElementById('authModal').classList.remove('hidden'); }
+function closeAuth() { document.getElementById('authModal').classList.add('hidden'); }
 
-function renderUI() {
-    const user = localStorage.getItem('pc_current_user') || 'GUEST';
-    const bal = parseFloat(localStorage.getItem(`pc_bal_${user}`) || 0);
-    const pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
-    const treasury = parseFloat(localStorage.getItem('pc_treasury_vault') || 0);
+function handleLogin() {
+    const user = document.getElementById('uName').value.trim();
+    const pass = document.getElementById('uPass').value.trim();
+    if(!user || !pass) return alert("字段不能为空");
 
-    // 创始人专属逻辑
-    if(user === "admin1991") {
-        document.getElementById('adminVaultPanel').classList.remove('hidden');
-        document.getElementById('vaultAmount').innerText = treasury.toFixed(2);
+    // 存储/校验逻辑
+    const storedPass = localStorage.getItem(`pc_key_${user}`);
+    if (storedPass && storedPass !== pass) return alert("身份验证失败：密钥错误");
+    if (!storedPass) localStorage.setItem(`pc_key_${user}`, pass);
+
+    localStorage.setItem('pc_session', user);
+    if (!localStorage.getItem(`pc_bal_${user}`)) localStorage.setItem(`pc_bal_${user}`, "100.00");
+    
+    location.reload();
+}
+
+function render() {
+    const user = localStorage.getItem('pc_session');
+    if(!user) {
+        document.getElementById('authBtn').innerText = "CONNECT";
+        renderMarkets(null);
+        return;
     }
 
-    // 计算总净值
+    // 开发者特权：admin1991
+    if(user === "admin1991") {
+        document.getElementById('adminPanel').classList.remove('hidden');
+        const fees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
+        document.getElementById('vaultAmt').innerText = fees.toFixed(2);
+    }
+
+    const bal = parseFloat(localStorage.getItem(`pc_bal_${user}`) || 0);
+    const pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
+    
     let posValue = 0;
     pos.forEach(p => {
         const m = markets.find(x => x.id === p.mid);
@@ -115,151 +138,129 @@ function renderUI() {
         posValue += curPrice * p.shares;
     });
 
-    document.getElementById('userBalance').innerText = `${bal.toFixed(2)} USDT`;
-    document.getElementById('netWorth').innerText = (bal + posValue).toFixed(2);
-    document.getElementById('addrDisplay').innerText = `0x${btoa(user).substring(0,10).toUpperCase()}`;
+    document.getElementById('netWorth').innerText = (bal + posValue).toFixed(2) + " USDT";
+    document.getElementById('authBtn').innerText = user.toUpperCase() + " (LOGOUT)";
+    document.getElementById('authBtn').onclick = () => { localStorage.removeItem('pc_session'); location.reload(); };
+    
+    document.getElementById('posSection').classList.remove('hidden');
+    renderMarkets(user);
+    renderPositions(user, pos);
+}
 
+function renderMarkets(user) {
     const list = document.getElementById('marketList');
     list.innerHTML = markets.map(m => {
         const noP = (1 - m.yesPrice).toFixed(2);
         return `
         <div class="market-card p-6 rounded-3xl flex flex-col md:flex-row items-center gap-6">
-            <h3 class="flex-1 font-bold text-gray-200 text-sm tracking-tight">${m.question}</h3>
-            <div class="flex gap-3">
-                <button onclick="executeTrade('${user}', ${m.id}, 'YES')" class="bg-green-500/5 border border-green-500/20 px-8 py-3 rounded-2xl hover:bg-green-500/10 transition group text-center">
+            <h3 class="flex-1 font-bold text-gray-200 text-sm">${m.question}</h3>
+            <div class="flex gap-2">
+                <button onclick="buy('${user}', ${m.id}, 'YES', ${m.yesPrice})" class="bg-green-500/10 border border-green-500/20 px-6 py-3 rounded-2xl hover:bg-green-500/20 transition text-center">
                     <span class="block text-[8px] text-green-500 font-black uppercase mb-1">Buy Yes</span>
-                    <span class="text-xl font-mono font-black text-green-400">$${m.yesPrice.toFixed(2)}</span>
+                    <span class="text-lg font-mono font-black text-green-400">$${m.yesPrice.toFixed(2)}</span>
                 </button>
-                <button onclick="executeTrade('${user}', ${m.id}, 'NO')" class="bg-red-500/5 border border-red-500/20 px-8 py-3 rounded-2xl hover:bg-red-500/10 transition group text-center">
+                <button onclick="buy('${user}', ${m.id}, 'NO', ${noP})" class="bg-red-500/10 border border-red-500/20 px-6 py-3 rounded-2xl hover:bg-red-500/20 transition text-center">
                     <span class="block text-[8px] text-red-500 font-black uppercase mb-1">Buy No</span>
-                    <span class="text-xl font-mono font-black text-red-400">$${noP}</span>
+                    <span class="text-lg font-mono font-black text-red-400">$${noP}</span>
                 </button>
             </div>
         </div>`;
     }).join('');
-
-    renderPositions(user, pos);
 }
 
-function executeTrade(user, mid, side) {
-    if(user === 'GUEST') return loginPrompt();
-    const amount = prompt("请输入买入金额 (USDT):", "100");
-    if(!amount || isNaN(amount) || amount <= 0) return;
+function buy(user, mid, side, price) {
+    if(!user) return openAuth();
+    const amt = prompt("投入金额 (USDT):", "10");
+    if(!amt || isNaN(amt) || amt <= 0) return;
 
     let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`));
-    const cost = parseFloat(amount);
-    if(bal < cost) return alert("余额不足");
+    if(bal < amt) return alert("余额不足");
 
-    // --- 核心手续费逻辑 ---
-    const fee = cost * FEE_RATE;
-    const netCost = cost - fee;
-    
-    // 累计到开发者金库
-    let treasury = parseFloat(localStorage.getItem('pc_treasury_vault') || 0);
-    localStorage.setItem('pc_treasury_vault', (treasury + fee).toFixed(2));
+    // 1% 手续费
+    const fee = amt * 0.01;
+    const net = amt - fee;
+    const totalFees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
+    localStorage.setItem('pc_protocol_fees', (totalFees + fee).toFixed(2));
 
-    // 计算份额与价格变动 (AMM模拟)
+    // AMM 逻辑
     const mIdx = markets.findIndex(m => m.id === mid);
-    const m = markets[mIdx];
-    const impact = netCost / 2000; // 模拟流动性深度
-    const executionPrice = side === 'YES' ? m.yesPrice + (impact/2) : (1 - m.yesPrice) + (impact/2);
-    const shares = netCost / executionPrice;
+    const impact = net / 1500;
+    const shares = net / (price + (impact/2));
+    
+    if(side === 'YES') markets[mIdx].yesPrice = Math.min(0.98, markets[mIdx].yesPrice + impact);
+    else markets[mIdx].yesPrice = Math.max(0.02, markets[mIdx].yesPrice - impact);
 
-    if(side === 'YES') m.yesPrice = Math.min(0.98, m.yesPrice + impact);
-    else m.yesPrice = Math.max(0.02, m.yesPrice - impact);
-
-    // 存入账本
-    bal -= cost;
-    localStorage.setItem(`pc_bal_${user}`, bal.toFixed(2));
+    localStorage.setItem(`pc_bal_${user}`, (bal - amt).toFixed(2));
     let pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
-    pos.unshift({ id: Date.now(), mid: mid, side: side, shares: shares, entryPrice: executionPrice });
+    pos.unshift({ id: Date.now(), mid: mid, side: side, shares: shares, price: price });
     localStorage.setItem(`pc_pos_${user}`, JSON.stringify(pos));
-    localStorage.setItem('pc_markets_v14', JSON.stringify(markets));
-
+    localStorage.setItem('pc_markets_v15', JSON.stringify(markets));
     location.reload();
 }
 
-// 创始人提现功能
-function withdrawTreasury() {
-    const user = localStorage.getItem('pc_current_user');
-    let treasury = parseFloat(localStorage.getItem('pc_treasury_vault') || 0);
-    if(treasury <= 0) return alert("当前没有可提取的收益");
-
-    let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`) || 0);
-    localStorage.setItem(`pc_bal_${user}`, (bal + treasury).toFixed(2));
-    localStorage.setItem('pc_treasury_vault', "0.00");
-
-    alert(`成功！已提取 ${treasury.toFixed(2)} USDT 手续费至您的账户。`);
+function withdrawFees() {
+    const user = localStorage.getItem('pc_session');
+    const fees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
+    if(fees <= 0) return alert("没有可提取收益");
+    
+    let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`));
+    localStorage.setItem(`pc_bal_${user}`, (bal + fees).toFixed(2));
+    localStorage.setItem('pc_protocol_fees', "0.00");
+    alert("收益已成功提取至开发者余额！");
     location.reload();
 }
 
 function renderPositions(user, pos) {
     const container = document.getElementById('posContainer');
     if(pos.length === 0) {
-        container.innerHTML = `<div class="p-12 text-center text-gray-700 text-[10px] font-black tracking-widest uppercase italic">Market Neutral - No Assets</div>`;
+        container.innerHTML = `<p class="p-10 text-center text-gray-700 text-[10px] font-black uppercase tracking-widest">Market Neutral</p>`;
         return;
     }
     container.innerHTML = pos.map(p => {
         const m = markets.find(x => x.id === p.mid);
         const curPrice = p.side === 'YES' ? m.yesPrice : (1 - m.yesPrice);
-        const value = p.shares * curPrice;
-        const pnl = (value - (p.shares * p.entryPrice)).toFixed(2);
+        const pnl = (p.shares * (curPrice - p.price)).toFixed(2);
         return `
-        <div class="p-6 border-b border-gray-800/50 flex items-center justify-between hover:bg-white/[0.02] transition">
+        <div class="p-6 border-b border-gray-800/50 flex items-center justify-between">
             <div class="flex-1">
                 <div class="text-[10px] text-gray-500 font-black mb-1">${m.question}</div>
-                <div class="text-xs font-black uppercase ${p.side === 'YES' ? 'text-green-500' : 'text-red-500'}">${p.side} ${p.shares.toFixed(2)} SHARES</div>
+                <div class="text-xs font-black ${p.side === 'YES' ? 'text-green-500' : 'text-red-500'}">${p.side} ${p.shares.toFixed(2)} 份</div>
             </div>
             <div class="text-right mr-8">
                 <div class="text-sm font-mono font-black ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}">${pnl >= 0 ? '+' : ''}${pnl}</div>
-                <div class="text-[8px] text-gray-600 font-bold uppercase tracking-tighter tracking-widest">PROFIT/LOSS</div>
+                <div class="text-[8px] text-gray-600 font-bold uppercase tracking-widest">PnL</div>
             </div>
-            <button onclick="sellAsset('${user}', ${p.id})" class="bg-gray-800 hover:bg-white hover:text-black px-4 py-2 rounded-xl text-[10px] font-black transition">SELL</button>
+            <button onclick="sellAsset('${user}', ${p.id}, ${curPrice})" class="bg-gray-800 px-4 py-2 rounded-xl text-[10px] font-black hover:bg-white hover:text-black transition">SELL</button>
         </div>`;
     }).join('');
 }
 
-function sellAsset(user, posId) {
-    let pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`)) || [];
-    const p = pos.find(x => x.id === posId);
+function sellAsset(user, pid, curPrice) {
+    let pos = JSON.parse(localStorage.getItem(`pc_pos_${user}`));
+    const p = pos.find(x => x.id === pid);
     const m = markets.find(x => x.id === p.mid);
-    const curPrice = p.side === 'YES' ? m.yesPrice : (1 - m.yesPrice);
     
-    // 卖出也扣手续费
-    const grossReturn = p.shares * curPrice;
-    const fee = grossReturn * FEE_RATE;
-    const netReturn = grossReturn - fee;
-
-    let treasury = parseFloat(localStorage.getItem('pc_treasury_vault') || 0);
-    localStorage.setItem('pc_treasury_vault', (treasury + fee).toFixed(2));
+    const gross = p.shares * curPrice;
+    const fee = gross * 0.01;
+    const totalFees = parseFloat(localStorage.getItem('pc_protocol_fees') || 0);
+    localStorage.setItem('pc_protocol_fees', (totalFees + fee).toFixed(2));
 
     let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`));
-    localStorage.setItem(`pc_bal_${user}`, (bal + netReturn).toFixed(2));
+    localStorage.setItem(`pc_bal_${user}`, (bal + (gross - fee)).toFixed(2));
     
-    pos = pos.filter(x => x.id !== posId);
-    localStorage.setItem(`pc_pos_${user}`, JSON.stringify(pos));
+    // 反向价格影响
+    const impact = gross / 1500;
+    if(p.side === 'YES') m.yesPrice = Math.max(0.02, m.yesPrice - impact);
+    else m.yesPrice = Math.min(0.98, m.yesPrice + impact);
+
+    localStorage.setItem(`pc_pos_${user}`, JSON.stringify(pos.filter(x => x.id !== pid)));
+    localStorage.setItem('pc_markets_v15', JSON.stringify(markets));
     location.reload();
 }
 
-function loginPrompt() {
-    const name = prompt("请输入交易员代号:");
-    if(name) {
-        localStorage.setItem('pc_current_user', name);
-        if(!localStorage.getItem(`pc_bal_${name}`)) localStorage.setItem(`pc_bal_${name}`, "500.00");
-        location.reload();
-    }
-}
+function resetSystem() { if(confirm("此操作将清除所有用户和交易数据！确认？")) { localStorage.clear(); location.reload(); } }
 
-function confirmDeposit() {
-    const user = localStorage.getItem('pc_current_user');
-    const val = parseFloat(document.getElementById('depAmt').value);
-    if(!val || !user) return;
-    let bal = parseFloat(localStorage.getItem(`pc_bal_${user}`) || 0);
-    localStorage.setItem(`pc_bal_${user}`, (bal + val).toFixed(2));
-    location.reload();
-}
-
-window.onload = renderUI;
+window.onload = render;
 </script>
 </body>
 </html>
