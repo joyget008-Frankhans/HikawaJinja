@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyClone - 创始人全功能版</title>
+<title>PolyClone - 创始人工业级安全版</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 .admin-border { border: 2px solid #a855f7; }
@@ -13,95 +13,118 @@
 .hidden { display: none; }
 </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen gradient-bg">
+<body class="bg-gray-950 text-gray-100 min-h-screen gradient-bg font-sans">
 
 <nav class="border-b border-gray-800 p-4 flex justify-between items-center bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
 <div class="flex items-center gap-2">
 <div class="w-8 h-8 bg-blue-600 rounded-lg rotate-45"></div>
-<span class="text-xl font-bold tracking-tight ml-2">POLY<span class="text-blue-500">CLONE</span></span>
+<span class="text-xl font-bold tracking-tight ml-2 italic text-blue-500">POLYCLONE</span>
 </div>
 <div class="flex items-center gap-4">
 <span id="userNameDisplay" class="text-sm text-gray-400"></span>
-<button id="authBtn" onclick="openAuth()" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-900/20">
-注册 / 登录
+<button id="authBtn" onclick="openAuth()" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-xl font-bold text-sm transition">
+登录 / 注册
 </button>
 </div>
 </nav>
 
 <main class="max-w-4xl mx-auto p-6">
-<div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-<div class="bg-gray-900 w-full max-w-sm p-8 rounded-3xl border border-gray-800 text-center">
-<h2 class="text-2xl font-bold mb-6 italic text-blue-500">用户注册</h2>
-<input id="uInput" type="text" class="w-full bg-black border border-gray-700 p-4 rounded-2xl outline-none focus:border-blue-500 text-center mb-4" placeholder="设置你的用户名">
-<button onclick="handleAuth()" class="w-full bg-blue-600 py-3 rounded-2xl font-bold">确认进入</button>
-<button onclick="closeAuth()" class="mt-4 text-gray-500 text-sm">取消</button>
+
+<div id="authModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-6">
+<div class="bg-gray-900 w-full max-w-sm p-8 rounded-3xl border border-gray-800">
+<h2 class="text-2xl font-bold mb-6 text-center text-white italic">身份验证</h2>
+<div class="space-y-4">
+    <div>
+        <label class="text-[10px] text-gray-500 uppercase font-bold ml-1">用户名 (唯一)</label>
+        <input id="uInput" type="text" class="w-full bg-black border border-gray-700 p-4 rounded-2xl outline-none focus:border-blue-500" placeholder="设置用户名">
+    </div>
+    <div>
+        <label class="text-[10px] text-gray-500 uppercase font-bold ml-1">强密码 (8-16位 大小写+特殊字符)</label>
+        <input id="pInput" type="password" class="w-full bg-black border border-gray-700 p-4 rounded-2xl outline-none focus:border-blue-500 text-blue-400" placeholder="设置强密码">
+    </div>
+    <button onclick="handleAuth()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-bold mt-4 shadow-lg shadow-blue-500/20">确认进入</button>
+    <button onclick="closeAuth()" class="w-full text-gray-500 text-sm mt-2">返回</button>
+</div>
+<div class="mt-6 p-3 bg-blue-900/20 rounded-xl">
+    <p class="text-[10px] text-blue-300 leading-relaxed">提示：首次输入即为注册，再次输入即为登录。密码必须包含大小写字母及特殊符号。</p>
+</div>
 </div>
 </div>
 
-<section id="adminPanel" class="hidden mb-10 p-6 bg-gray-900 rounded-2xl admin-border shadow-2xl shadow-purple-900/20">
+<section id="adminPanel" class="hidden mb-10 p-6 bg-gray-900 rounded-2xl admin-border">
 <div class="flex justify-between items-center mb-6">
-<h2 class="text-xl font-bold text-purple-400 flex items-center gap-2"><span>🛡️</span> 创始人管理后台</h2>
-<span class="text-[10px] text-purple-300 bg-purple-900/40 px-3 py-1 rounded-full uppercase tracking-widest">Master Identity: 1991-01-14</span>
+<h2 class="text-xl font-bold text-purple-400">🛡️ 创始人管理后台</h2>
+<span class="text-[10px] text-purple-300 bg-purple-900/40 px-3 py-1 rounded-full italic">Auth: admin1991 Verified</span>
 </div>
 <div class="space-y-3">
 <input type="text" id="marketInput" placeholder="输入新的预测话题..." class="w-full bg-black/40 border border-gray-700 rounded-xl p-4 focus:border-purple-500 outline-none">
-<button onclick="addMarket()" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-xl font-bold">发布新市场</button>
+<button onclick="addMarket()" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-xl font-bold transition">立即发布</button>
 </div>
 </section>
 
-<div class="flex items-center justify-between mb-8">
-<h2 class="text-2xl font-bold italic text-white">热门预测 🔥</h2>
-<div class="text-sm text-gray-400">状态: <span class="text-green-400 font-mono">已连接区块链</span></div>
-</div>
-
-<div id="marketList" class="grid grid-cols-1 gap-6"></div>
+<div id="marketList" class="grid grid-cols-1 gap-6 mt-10"></div>
 </main>
 
 <script>
 let markets = [
-{ id: 1, question: "2026年人类会登上火星吗？", yesPrice: 0.15, noPrice: 0.85 },
-{ id: 2, question: "比特币会在2026年内触及 $150,000 吗？", yesPrice: 0.62, noPrice: 0.38 }
+    { id: 1, question: "2026年人类会登上火星吗？", yesPrice: 0.15, noPrice: 0.85 },
+    { id: 2, question: "比特币会在2026年内触及 $150,000 吗？", yesPrice: 0.62, noPrice: 0.38 }
 ];
 
 function openAuth() { document.getElementById('authModal').classList.remove('hidden'); }
 function closeAuth() { document.getElementById('authModal').classList.add('hidden'); }
 
-function handleAuth() {
-    const name = document.getElementById('uInput').value;
-    if(!name) return;
-    localStorage.setItem('pc_user', name);
-    checkAdmin(name);
-    location.reload();
+// 核心逻辑：强密码正则校验
+function validatePassword(pw) {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{8,16}$/;
+    return regex.test(pw);
 }
 
-function checkAdmin(name) {
-    if(name === "admin1991") {
-        document.getElementById('adminPanel').classList.remove('hidden');
+function handleAuth() {
+    const name = document.getElementById('uInput').value.trim();
+    const pass = document.getElementById('pInput').value.trim();
+    
+    if(!name || !pass) return alert("账号密码不能为空");
+
+    const storedPass = localStorage.getItem(`pc_pwd_${name}`);
+
+    if (storedPass) {
+        // 登录逻辑
+        if (storedPass === pass) {
+            localStorage.setItem('pc_current_user', name);
+            alert("登录成功，欢迎回来！");
+            location.reload();
+        } else {
+            alert("该账号已被注册，密码错误！");
+        }
+    } else {
+        // 注册逻辑：先检查密码强度
+        if (!validatePassword(pass)) {
+            return alert("密码不合规！\n要求：8-16位，必须包含大写、小写、数字和特殊字符。");
+        }
+        localStorage.setItem(`pc_pwd_${name}`, pass);
+        localStorage.setItem('pc_current_user', name);
+        alert("恭喜！强密码账户注册成功。");
+        location.reload();
     }
 }
 
 function renderMarkets() {
-    const user = localStorage.getItem('pc_user');
-    if(user) {
-        document.getElementById('userNameDisplay').innerText = `你好, ${user}`;
-        document.getElementById('authBtn').innerText = "登出";
-        document.getElementById('authBtn').onclick = () => { localStorage.removeItem('pc_user'); location.reload(); };
-        checkAdmin(user);
+    const currentUser = localStorage.getItem('pc_current_user');
+    if(currentUser) {
+        document.getElementById('userNameDisplay').innerText = `你好, ${currentUser}`;
+        document.getElementById('authBtn').innerText = "退出";
+        document.getElementById('authBtn').onclick = () => { localStorage.removeItem('pc_current_user'); location.reload(); };
+        if(currentUser === "admin1991") document.getElementById('adminPanel').classList.remove('hidden');
     }
     
     const list = document.getElementById('marketList');
     list.innerHTML = markets.map(m => `
         <div class="market-card bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h3 class="text-lg font-semibold flex-1">${m.question}</h3>
+            <h3 class="text-lg font-semibold flex-1 text-gray-200">${m.question}</h3>
             <div class="flex gap-3">
-                <button onclick="bet('Yes')" class="bg-green-500/10 border border-green-500/30 w-24 py-2 rounded-xl transition">
-                    <span class="text-xs text-green-500 font-bold block">YES</span>
-                    <span class="text-lg font-mono text-green-400">$${m.yesPrice}</span>
-                </button>
-                <button onclick="bet('No')" class="bg-red-500/10 border border-red-500/30 w-24 py-2 rounded-xl transition">
-                    <span class="text-xs text-red-500 font-bold block">NO</span>
-                    <span class="text-lg font-mono text-red-400">$${m.noPrice}</span>
-                </button>
+                <button onclick="bet('Yes')" class="bg-green-500/10 border border-green-500/30 w-24 py-2 rounded-xl text-green-400 font-bold italic text-sm">YES $${m.yesPrice}</button>
+                <button onclick="bet('No')" class="bg-red-500/10 border border-red-500/30 w-24 py-2 rounded-xl text-red-400 font-bold italic text-sm">NO $${m.noPrice}</button>
             </div>
         </div>
     `).join('');
@@ -116,9 +139,9 @@ function addMarket() {
 }
 
 function bet(side) {
-    const user = localStorage.getItem('pc_user');
+    const user = localStorage.getItem('pc_current_user');
     if(!user) return openAuth();
-    alert(`${user}，正在调用合约买入 ${side}！`);
+    alert(`[确认交易] 账户：${user}\n买入方向：${side}`);
 }
 
 window.onload = renderMarkets;
