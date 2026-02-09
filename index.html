@@ -3,87 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PolyClone v3.3 - 阶级森严版</title>
+    <title>PolyClone v3.4 - 铁腕控制版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.umd.js"></script>
     <style>
-        /* 核心视觉：背景雷达与粒子 */
         .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(circle at 2px 2px, rgba(59,130,246,0.05) 1px, transparent 0); background-size: 40px 40px; z-index: -1; }
-        @keyframes slide-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .toast { animation: slide-in 0.5s ease-out forwards; border: 1px solid rgba(59,130,246,0.3); background: rgba(2,6,23,0.9); backdrop-filter: blur(10px); }
-        
-        /* 创始人金紫霓虹 */
-        .founder-glow { border: 2px solid #a855f7 !important; box-shadow: 0 0 20px rgba(168,85,247,0.4) !important; color: #d8b4fe !important; }
-        .whale-glow { border: 1px solid #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
-        
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .founder-glow { border: 2px solid #a855f7 !important; box-shadow: 0 0 20px rgba(168,85,247,0.4) !important; color: #d8b4fe !important; }
         .hidden { display: none !important; }
-        
-        /* 繁琐装饰线 */
-        .hex-decor { font-family: monospace; font-size: 8px; opacity: 0.3; overflow: hidden; height: 12px; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .pending-tag { animation: pulse-red 2s infinite; }
     </style>
 </head>
-<body class="bg-[#020617] text-gray-100 min-h-screen font-sans">
+<body class="bg-[#010409] text-gray-100 min-h-screen">
     <div class="bg-mesh"></div>
 
     <div id="toastContainer" class="fixed top-12 right-6 z-[4000] space-y-3 w-72"></div>
 
-    <div class="fixed top-0 w-full z-[100] bg-black/60 border-b border-white/5 h-8 flex items-center justify-between px-6 text-[9px] font-mono tracking-widest text-blue-400">
-        <div>CORE_NODE: ONLINE | ENCRYPTION: AES-256</div>
-        <div id="liveClock">00:00:00 UTC</div>
-        <div>GLOBAL_PULSE: STABLE</div>
-    </div>
-
     <div id="gateway" class="fixed inset-0 z-[5000] bg-black flex items-center justify-center p-6">
         <div class="max-w-md w-full glass p-12 rounded-[4rem] border-blue-500/20 text-center">
-            <div class="mb-8">
-                <h1 class="text-5xl font-black italic tracking-tighter">POLYCLONE</h1>
-                <p class="text-blue-500 font-bold text-[9px] mt-2 tracking-[1em] uppercase">Supreme Terminal</p>
-            </div>
+            <h1 class="text-5xl font-black italic tracking-tighter mb-8 text-blue-500">POLYCLONE</h1>
             <div class="space-y-4">
-                <input id="uName" type="text" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl outline-none focus:border-blue-500 transition-all text-center font-bold" placeholder="ACCOUNT ID">
-                <input id="uPass" type="password" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl outline-none focus:border-blue-500 transition-all text-center font-bold" placeholder="ACCESS KEY">
-                <button onclick="handleLogin()" class="w-full bg-blue-600 py-6 rounded-3xl font-black uppercase tracking-widest hover:scale-[1.02] transition shadow-2xl shadow-blue-600/20">Init Session</button>
+                <input id="uName" type="text" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl outline-none" placeholder="ACCOUNT ID">
+                <input id="uPass" type="password" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl outline-none" placeholder="SECURE KEY">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 py-6 rounded-3xl font-black uppercase tracking-widest hover:scale-[1.02] transition">Init Session</button>
             </div>
         </div>
     </div>
 
     <div id="mainApp" class="hidden pt-12 px-6">
-        <header class="max-w-6xl mx-auto py-10 flex flex-col md:flex-row justify-between items-center gap-8">
+        <header class="max-w-6xl mx-auto py-10 flex flex-col md:flex-row justify-between items-center gap-8 border-b border-white/5 mb-10">
             <div class="flex items-center gap-6">
                 <div id="userAvatar" class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center text-3xl font-black italic shadow-2xl">P</div>
                 <div>
                     <div class="flex items-center gap-2">
                         <span id="userNameDisp" class="text-3xl font-black italic">---</span>
-                        <span id="rankBadge" class="px-3 py-1 rounded-full text-[8px] font-black uppercase bg-blue-500/20 text-blue-400 border border-blue-500/30">Trader</span>
+                        <span id="rankBadge" class="px-3 py-1 rounded-full text-[8px] font-black uppercase border">Trader</span>
                     </div>
-                    <div class="hex-decor mt-1">0x74 0x68 0x65 0x20 0x66 0x6f 0x75 0x6e 0x64 0x65 0x72</div>
+                    <div class="text-[9px] text-gray-500 mt-1 font-mono uppercase tracking-[0.3em]">Session: Encrypted_Link_Active</div>
                 </div>
             </div>
             
             <div class="flex gap-4">
-                <div class="glass p-6 rounded-[2.5rem] min-w-[240px] relative overflow-hidden">
-                    <div class="text-[9px] text-gray-500 font-black uppercase mb-1">Available Liquidity</div>
+                <div class="glass p-6 rounded-[2.5rem] min-w-[240px]">
+                    <div class="text-[9px] text-gray-500 font-black uppercase mb-1">Total Liquidity</div>
                     <div class="text-4xl font-mono font-black text-white">$ <span id="userBal">0.00</span></div>
-                    <div class="absolute bottom-0 right-0 w-24 h-1 bg-gradient-to-r from-transparent to-blue-500"></div>
                 </div>
-                <button onclick="toggleDeposit()" class="bg-blue-600 hover:bg-blue-500 px-8 rounded-[2rem] font-black text-xs uppercase shadow-xl shadow-blue-600/30">Deposit</button>
+                <button onclick="toggleDeposit()" class="bg-blue-600 hover:bg-blue-500 px-8 rounded-[2rem] font-black text-xs uppercase shadow-xl shadow-blue-600/30">Recharge</button>
             </div>
         </header>
 
-        <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10 pb-20">
-            <aside id="adminPanel" class="hidden space-y-6">
-                <div class="glass p-8 rounded-[3.5rem] border-purple-500/30 bg-gradient-to-br from-purple-900/10 to-transparent">
-                    <h2 class="text-purple-400 font-black text-[10px] uppercase tracking-[0.4em] mb-8 italic">Master Control</h2>
-                    <div class="mb-10">
-                        <span class="text-[9px] text-gray-500 font-black uppercase">Unclaimed Fees</span>
-                        <div id="vaultAmt" class="text-4xl font-black text-white italic">$ 0.00</div>
+        <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <aside id="adminPanel" class="hidden lg:col-span-1 space-y-8">
+                <div class="glass p-8 rounded-[3.5rem] border-purple-500/30">
+                    <h2 class="text-purple-400 font-black text-[10px] uppercase tracking-[0.4em] mb-6 italic">Master Controls</h2>
+                    <div class="bg-purple-900/10 p-5 rounded-2xl mb-6">
+                        <span class="text-[9px] text-gray-500 block mb-1">Protocol Fees</span>
+                        <div id="vaultAmt" class="text-3xl font-black text-white italic">$ 0.00</div>
                     </div>
-                    <button onclick="claimFees()" class="w-full bg-purple-600 py-5 rounded-2xl font-black text-xs uppercase hover:bg-purple-500 transition mb-10 shadow-lg shadow-purple-900/40">Claim Profits</button>
+                    <button onclick="claimFees()" class="w-full bg-purple-600 py-4 rounded-xl font-black text-xs uppercase mb-6">Harvest</button>
                     
-                    <div class="space-y-4">
-                        <input id="newMarketQ" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-xs outline-none focus:border-purple-500 transition" placeholder="Market Question...">
-                        <button onclick="createNewMarket()" class="w-full border border-purple-500/30 text-purple-400 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-purple-500/10 transition">Deploy To Network</button>
+                    <div class="mt-8 border-t border-white/10 pt-6">
+                        <h3 class="text-[10px] text-yellow-500 font-black uppercase mb-4 tracking-widest">Pending Audits / 待核销申请</h3>
+                        <div id="auditList" class="space-y-4 max-h-[400px] overflow-y-auto">
+                            </div>
                     </div>
                 </div>
             </aside>
@@ -95,12 +78,20 @@
     </div>
 
     <div id="depositModal" class="fixed inset-0 z-[6000] bg-black/95 hidden flex items-center justify-center p-6 backdrop-blur-2xl">
-        <div class="glass max-w-md w-full p-12 rounded-[4rem] border-blue-500/30 text-center">
-            <h2 class="text-3xl font-black text-white italic mb-4">RECHARGE</h2>
-            <p class="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-10">Inject USDT Assets</p>
-            <input id="depAmt" type="number" class="w-full bg-white/5 border border-white/10 p-6 rounded-3xl mb-6 text-center text-2xl font-black outline-none" placeholder="0.00">
-            <button onclick="submitDeposit()" class="w-full bg-blue-600 py-6 rounded-3xl font-black uppercase tracking-widest shadow-2xl">Confirm Injection</button>
-            <button onclick="toggleDeposit()" class="w-full text-gray-600 text-[10px] font-black mt-6 uppercase">Close</button>
+        <div class="glass max-w-md w-full p-12 rounded-[4rem] border-blue-500/30">
+            <h2 class="text-3xl font-black text-white italic text-center mb-10 tracking-tighter">ASSET AUDIT</h2>
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[9px] text-gray-500 font-black uppercase ml-4 mb-2 block">Amount (USDT)</label>
+                    <input id="depAmt" type="number" class="w-full bg-white/5 border border-white/10 p-6 rounded-3xl text-2xl font-black outline-none focus:border-blue-500" placeholder="0.00">
+                </div>
+                <div>
+                    <label class="text-[9px] text-gray-500 font-black uppercase ml-4 mb-2 block">Transaction ID (TXID)</label>
+                    <input id="depTxid" type="text" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-xs font-mono" placeholder="Enter Hash or Memo">
+                </div>
+                <button onclick="submitDepositRequest()" class="w-full bg-blue-600 py-6 rounded-3xl font-black uppercase tracking-widest shadow-2xl">Submit for Review</button>
+                <button onclick="toggleDeposit()" class="w-full text-gray-600 text-[10px] font-black uppercase">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -108,33 +99,31 @@
 const ADMIN_ID = "admin1991";
 const ADMIN_KEY = "Han183406@";
 
-let markets = JSON.parse(localStorage.getItem('v33_m')) || [
-    { id: 1, q: "2026年人类会登上火星吗？", pool: 20000, yesP: 0.28, history: [{time:1738368000,value:0.2},{time:1739059200,value:0.28}], active: true }
-];
-let userPositions = JSON.parse(localStorage.getItem('v33_pos')) || {};
+let markets = JSON.parse(localStorage.getItem('v34_m')) || [{ id: 1, q: "2026年人类会登上火星吗？", pool: 20000, yesP: 0.28, history: [{time:1738368000,value:0.2},{time:1739059200,value:0.28}], active: true }];
+let userPositions = JSON.parse(localStorage.getItem('v34_pos')) || {};
+let auditRequests = JSON.parse(localStorage.getItem('v34_audits')) || [];
 
 function handleLogin() {
     const u = document.getElementById('uName').value.trim();
     const p = document.getElementById('uPass').value.trim();
-    if(u === ADMIN_ID && p !== ADMIN_KEY) return alert("SECURE_AUTH: DENIED");
+    if(u === ADMIN_ID && p !== ADMIN_KEY) return alert("AUTH: DENIED");
     if(u !== ADMIN_ID) {
-        const s = localStorage.getItem(`v33_k_${u}`);
-        if(s && s !== p) return alert("SECURE_AUTH: KEY_ERR");
-        if(!s) localStorage.setItem(`v33_k_${u}`, p);
+        const s = localStorage.getItem(`v34_k_${u}`);
+        if(s && s !== p) return alert("AUTH: KEY_ERR");
+        if(!s) localStorage.setItem(`v34_k_${u}`, p);
     }
-    localStorage.setItem('v33_s', u);
-    if(!localStorage.getItem(`v33_b_${u}`)) localStorage.setItem(`v33_b_${u}`, "5000.00");
+    localStorage.setItem('v34_s', u);
+    if(!localStorage.getItem(`v34_b_${u}`)) localStorage.setItem(`v34_b_${u}`, "5000.00");
     renderApp();
 }
 
 function renderApp() {
-    const user = localStorage.getItem('v33_s');
+    const user = localStorage.getItem('v34_s');
     if(!user) return;
     document.getElementById('gateway').classList.add('hidden');
     document.getElementById('mainApp').classList.remove('hidden');
     document.getElementById('userNameDisp').innerText = user;
     
-    // 阶级森严：创始人光效
     if(user === ADMIN_ID) {
         document.getElementById('adminPanel').classList.remove('hidden');
         document.getElementById('userAvatar').classList.add('founder-glow');
@@ -142,51 +131,54 @@ function renderApp() {
         document.getElementById('rankBadge').classList.add('founder-glow');
     }
     updateUI();
-    startClock();
 }
 
 function updateUI() {
-    const user = localStorage.getItem('v33_s');
-    const bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
-    document.getElementById('userBal').innerText = bal.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('vaultAmt').innerText = "$ " + parseFloat(localStorage.getItem('v33_f') || 0).toFixed(2);
+    const user = localStorage.getItem('v34_s');
+    document.getElementById('userBal').innerText = parseFloat(localStorage.getItem(`v34_b_${user}`)).toLocaleString(undefined, {minimumFractionDigits: 2});
+    document.getElementById('vaultAmt').innerText = "$ " + parseFloat(localStorage.getItem('v34_f') || 0).toFixed(2);
+
+    // 渲染审核列表 (仅创始人可见)
+    if(user === ADMIN_ID) {
+        const auditList = document.getElementById('auditList');
+        auditList.innerHTML = auditRequests.length === 0 ? '<p class="text-[9px] text-gray-700 italic">No pending audits.</p>' : 
+        auditRequests.map((req, idx) => `
+            <div class="p-4 bg-white/5 border border-yellow-500/20 rounded-2xl relative overflow-hidden">
+                <div class="text-[9px] text-yellow-500 font-black uppercase mb-1">${req.user} Requesting</div>
+                <div class="text-xl font-black text-white mb-2">$ ${req.amt}</div>
+                <div class="text-[8px] font-mono text-gray-500 break-all mb-4">TX: ${req.txid}</div>
+                <div class="flex gap-2">
+                    <button onclick="approveAudit(${idx})" class="flex-1 bg-green-600 text-[9px] font-black py-2 rounded-lg uppercase">Approve</button>
+                    <button onclick="rejectAudit(${idx})" class="flex-1 bg-red-900 text-[9px] font-black py-2 rounded-lg uppercase">Deny</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
     const list = document.getElementById('marketList');
     list.innerHTML = markets.filter(m => m.active).map(m => {
         const myPos = (userPositions[user] || []).filter(p => p.mid === m.id);
         const yesAmt = myPos.filter(p => p.side === 'YES').reduce((s, a) => s + a.amt, 0);
         const noAmt = myPos.filter(p => p.side === 'NO').reduce((s, a) => s + a.amt, 0);
-
         return `
-            <div class="glass p-10 rounded-[4rem] border-white/5 mb-10 hover:border-blue-500/20 transition-all group relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-20 group-hover:opacity-100 transition"></div>
+            <div class="glass p-10 rounded-[3.5rem] border-white/5 mb-10 group relative overflow-hidden hover:border-blue-500/30 transition-all">
                 <div class="flex justify-between items-start mb-6">
-                    <h3 class="text-2xl font-black italic tracking-tight">${m.q}</h3>
-                    <div class="text-right">
-                        <div class="text-4xl font-mono font-black text-blue-500">$ ${m.yesP.toFixed(2)}</div>
-                        <div class="text-[9px] text-gray-600 font-black uppercase mt-1 tracking-widest">Global Pool: $ ${m.pool.toLocaleString()}</div>
+                    <h3 class="text-2xl font-black italic">${m.q}</h3>
+                    <div class="text-right font-mono">
+                        <div class="text-4xl font-black text-blue-500">$ ${m.yesP.toFixed(2)}</div>
+                        <div class="text-[9px] text-gray-600 font-black uppercase mt-1">Pool: $ ${m.pool.toLocaleString()}</div>
                     </div>
                 </div>
-                
-                <div id="chart-${m.id}" class="chart-container h-48 bg-black/20 rounded-3xl mb-8"></div>
-
+                <div id="chart-${m.id}" class="h-48 rounded-3xl mb-8 bg-black/40 border border-white/5 overflow-hidden"></div>
                 <div class="grid grid-cols-2 gap-6 mb-8">
-                    <div class="bg-blue-500/5 p-6 rounded-3xl border border-blue-500/10">
-                        <div class="text-[9px] text-gray-500 font-black uppercase mb-2">My YES Position</div>
-                        <div class="text-xl font-mono font-black ${yesAmt > 0 ? 'text-blue-400' : 'text-gray-800'}">$ ${yesAmt.toFixed(2)}</div>
-                    </div>
-                    <div class="bg-red-500/5 p-6 rounded-3xl border border-red-500/10 text-right">
-                        <div class="text-[9px] text-gray-500 font-black uppercase mb-2">My NO Position</div>
-                        <div class="text-xl font-mono font-black ${noAmt > 0 ? 'text-red-400' : 'text-gray-800'}">$ ${noAmt.toFixed(2)}</div>
-                    </div>
+                    <div class="bg-blue-500/5 p-6 rounded-3xl border border-blue-500/10"><div class="text-[9px] text-gray-500 font-black mb-2">My YES Position</div><div class="text-xl font-mono font-black text-blue-400">$ ${yesAmt.toFixed(2)}</div></div>
+                    <div class="bg-red-500/5 p-6 rounded-3xl border border-red-500/10 text-right"><div class="text-[9px] text-gray-500 font-black mb-2">My NO Position</div><div class="text-xl font-mono font-black text-red-400">$ ${noAmt.toFixed(2)}</div></div>
                 </div>
-
                 <div class="flex gap-4">
-                    <button onclick="trade('${user}', ${m.id}, 'YES')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-xs shadow-2xl shadow-blue-900/40">Execute YES</button>
-                    <button onclick="trade('${user}', ${m.id}, 'NO')" class="flex-1 bg-gray-900 border border-white/10 py-5 rounded-[2rem] font-black uppercase text-xs">Execute NO</button>
+                    <button onclick="trade('${user}', ${m.id}, 'YES')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-xs">Execute YES</button>
+                    <button onclick="trade('${user}', ${m.id}, 'NO')" class="flex-1 bg-gray-900 py-5 rounded-[2rem] font-black uppercase text-xs">Execute NO</button>
                 </div>
-            </div>
-        `;
+            </div>`;
     }).join('');
 
     markets.filter(m => m.active).forEach(m => {
@@ -203,13 +195,47 @@ function updateUI() {
     });
 }
 
+// --- 财务控制逻辑 ---
+function toggleDeposit() { document.getElementById('depositModal').classList.toggle('hidden'); }
+
+function submitDepositRequest() {
+    const amt = document.getElementById('depAmt').value;
+    const txid = document.getElementById('depTxid').value;
+    const user = localStorage.getItem('v34_s');
+    if(!amt || amt <= 0 || !txid) return alert("请填写完整的充值金额和交易哈希！");
+
+    auditRequests.push({ user, amt: parseFloat(amt), txid, time: Date.now() });
+    localStorage.setItem('v34_audits', JSON.stringify(auditRequests));
+    
+    alert("您的资产注入申请已提交！\n请等待创始人手动审核区块确认信息。");
+    toggleDeposit();
+    updateUI();
+}
+
+function approveAudit(idx) {
+    const req = auditRequests[idx];
+    let bal = parseFloat(localStorage.getItem(`v34_b_${req.user}`) || 0);
+    localStorage.setItem(`v34_b_${req.user}`, (bal + req.amt).toFixed(2));
+    
+    showToast("SYSTEM", req.amt, "APPROVED", `Target: ${req.user}`);
+    auditRequests.splice(idx, 1);
+    localStorage.setItem('v34_audits', JSON.stringify(auditRequests));
+    updateUI();
+}
+
+function rejectAudit(idx) {
+    auditRequests.splice(idx, 1);
+    localStorage.setItem('v34_audits', JSON.stringify(auditRequests));
+    alert("已拒绝该笔充值。");
+    updateUI();
+}
+
 function trade(user, mid, side) {
-    const amtStr = prompt(`Execution Amount (USDT):`, "250");
+    const amtStr = prompt(`Execution Amount (USDT):`, "200");
     const amt = parseFloat(amtStr);
     if(isNaN(amt) || amt <= 0) return;
-    let bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
+    let bal = parseFloat(localStorage.getItem(`v34_b_${user}`));
     if(bal < amt) return alert("LIQUIDITY_ERR: INSUFFICIENT BALANCE");
-
     const m = markets.find(x => x.id === mid);
     const fee = amt * 0.01;
     const net = amt - fee;
@@ -217,16 +243,12 @@ function trade(user, mid, side) {
     m.yesP = (side === 'YES') ? Math.min(0.99, m.yesP + impact) : Math.max(0.01, m.yesP - impact);
     m.pool += net;
     m.history.push({ time: Math.floor(Date.now()/1000), value: m.yesP });
-    
     if(!userPositions[user]) userPositions[user] = [];
     userPositions[user].push({ mid, side, amt: net });
-    
-    localStorage.setItem('v33_f', (parseFloat(localStorage.getItem('v33_f')||0) + fee).toFixed(2));
-    localStorage.setItem(`v33_b_${user}`, (bal - amt).toFixed(2));
-    localStorage.setItem('v33_m', JSON.stringify(markets));
-    localStorage.setItem('v33_pos', JSON.stringify(userPositions));
-    
-    // 全网广播弹窗
+    localStorage.setItem('v34_f', (parseFloat(localStorage.getItem('v34_f')||0) + fee).toFixed(2));
+    localStorage.setItem(`v34_b_${user}`, (bal - amt).toFixed(2));
+    localStorage.setItem('v34_m', JSON.stringify(markets));
+    localStorage.setItem('v34_pos', JSON.stringify(userPositions));
     showToast(user, amt, side, m.q);
     updateUI();
 }
@@ -234,49 +256,22 @@ function trade(user, mid, side) {
 function showToast(user, amt, side, q) {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
-    toast.className = `toast p-4 rounded-2xl shadow-2xl flex items-center gap-4 ${user === ADMIN_ID ? 'founder-glow' : ''}`;
-    toast.innerHTML = `
-        <div class="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center font-black text-xs">${user[0].toUpperCase()}</div>
-        <div class="flex-1">
-            <div class="text-[10px] font-black uppercase text-blue-400">${user} Just Executed</div>
-            <div class="text-[11px] font-bold text-white">$${amt} on ${side}</div>
-        </div>
-    `;
+    toast.className = `p-4 rounded-2xl glass border-blue-500/30 flex items-center gap-4 animate-bounce`;
+    toast.innerHTML = `<div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black text-[10px] italic">S</div><div><div class="text-[9px] font-black text-blue-400">${user}</div><div class="text-[10px] font-bold">$${amt} ${side} CONFIRMED</div></div>`;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
 }
 
-function toggleDeposit() { document.getElementById('depositModal').classList.toggle('hidden'); }
-function submitDeposit() {
-    const amt = document.getElementById('depAmt').value;
-    if(!amt || amt <= 0) return;
-    const user = localStorage.getItem('v33_s');
-    let bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
-    localStorage.setItem(`v33_b_${user}`, (bal + parseFloat(amt)).toFixed(2));
-    toggleDeposit();
-    updateUI();
-}
-
-function createNewMarket() {
-    const q = document.getElementById('newMarketQ').value.trim();
-    if(!q) return;
-    markets.push({ id: Date.now(), q, pool: 5000, yesP: 0.5, history: [{time: Math.floor(Date.now()/1000), value: 0.5}], active: true });
-    localStorage.setItem('v33_m', JSON.stringify(markets));
-    document.getElementById('newMarketQ').value = "";
-    updateUI();
-}
-
 function claimFees() {
-    const fees = parseFloat(localStorage.getItem('v33_f') || 0);
-    const user = localStorage.getItem('v33_s');
-    let bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
-    localStorage.setItem(`v33_b_${user}`, (bal + fees).toFixed(2));
-    localStorage.setItem('v33_f', "0");
+    const fees = parseFloat(localStorage.getItem('v34_f') || 0);
+    const user = localStorage.getItem('v34_s');
+    let bal = parseFloat(localStorage.getItem(`v34_b_${user}`));
+    localStorage.setItem(`v34_b_${user}`, (bal + fees).toFixed(2));
+    localStorage.setItem('v34_f', "0");
     updateUI();
 }
 
-function startClock() { setInterval(() => { document.getElementById('liveClock').innerText = new Date().toUTCString().split(' ')[4] + " UTC"; }, 1000); }
-function logout() { localStorage.removeItem('v33_s'); location.reload(); }
+function logout() { localStorage.removeItem('v34_s'); location.reload(); }
 window.onload = renderApp;
 </script>
 </body>
