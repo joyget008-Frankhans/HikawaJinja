@@ -3,165 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PolyClone v3.1 - 至尊华丽版</title>
+    <title>PolyClone v3.3 - 阶级森严版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.umd.js"></script>
     <style>
-        /* 粒子背景动画 */
-        @keyframes drift { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .bg-glow { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(29, 78, 216, 0.15) 0%, transparent 70%); animation: drift 20s linear infinite; z-index: -1; }
+        /* 核心视觉：背景雷达与粒子 */
+        .bg-mesh { position: fixed; inset: 0; background-image: radial-gradient(circle at 2px 2px, rgba(59,130,246,0.05) 1px, transparent 0); background-size: 40px 40px; z-index: -1; }
+        @keyframes slide-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast { animation: slide-in 0.5s ease-out forwards; border: 1px solid rgba(59,130,246,0.3); background: rgba(2,6,23,0.9); backdrop-filter: blur(10px); }
         
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .chart-container { height: 220px; width: 100%; border-radius: 1.5rem; overflow: hidden; margin: 15px 0; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
-        .ticker-wrap { background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(59, 130, 246, 0.3); overflow: hidden; white-space: nowrap; height: 30px; }
-        .ticker { display: inline-block; animation: ticker 30s linear infinite; font-family: monospace; font-size: 10px; color: #60a5fa; line-height: 30px; }
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        /* 创始人金紫霓虹 */
+        .founder-glow { border: 2px solid #a855f7 !important; box-shadow: 0 0 20px rgba(168,85,247,0.4) !important; color: #d8b4fe !important; }
+        .whale-glow { border: 1px solid #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+        
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
         .hidden { display: none !important; }
         
-        /* 充值按钮特效升级 */
-        .btn-gold { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); transition: 0.3s; }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(245, 158, 11, 0.6); }
+        /* 繁琐装饰线 */
+        .hex-decor { font-family: monospace; font-size: 8px; opacity: 0.3; overflow: hidden; height: 12px; }
     </style>
 </head>
-<body class="bg-[#020617] text-gray-100 min-h-screen overflow-x-hidden font-sans">
-    <div class="bg-glow"></div>
+<body class="bg-[#020617] text-gray-100 min-h-screen font-sans">
+    <div class="bg-mesh"></div>
 
-    <div class="ticker-wrap fixed top-0 w-full z-[100]">
-        <div class="ticker">
-            BTC/USDT $98,241.50 (+2.4%) | ETH/USDT $2,642.12 (-1.2%) | POLYCLONE INDEX: 1.024.55 | 欢迎回来，创始人。系统状态：极佳 | 全球成交量：$124.5M
-        </div>
+    <div id="toastContainer" class="fixed top-12 right-6 z-[4000] space-y-3 w-72"></div>
+
+    <div class="fixed top-0 w-full z-[100] bg-black/60 border-b border-white/5 h-8 flex items-center justify-between px-6 text-[9px] font-mono tracking-widest text-blue-400">
+        <div>CORE_NODE: ONLINE | ENCRYPTION: AES-256</div>
+        <div id="liveClock">00:00:00 UTC</div>
+        <div>GLOBAL_PULSE: STABLE</div>
     </div>
 
-    <div id="gateway" class="fixed inset-0 z-[2000] bg-black flex items-center justify-center p-6">
-        <div class="max-w-md w-full relative">
-            <div class="absolute -top-20 -left-20 w-40 h-40 bg-blue-600/20 blur-[100px]"></div>
-            <div class="text-center mb-10 relative">
-                <h1 class="text-5xl font-black italic tracking-tighter mb-2">POLYCLONE</h1>
-                <div class="h-1 w-20 bg-blue-600 mx-auto"></div>
-                <p class="text-blue-500 font-bold text-[10px] mt-4 tracking-[0.5em] uppercase">V3.1 Supreme Terminal</p>
-            </div>
-            <div class="glass p-10 rounded-[3.5rem] border-blue-500/20">
-                <input id="uName" type="text" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl mb-4 outline-none focus:border-blue-500 transition-all" placeholder="IDENTIFICATION">
-                <input id="uPass" type="password" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl mb-8 outline-none focus:border-blue-500 transition-all" placeholder="ACCESS KEY">
-                <button onclick="handleLogin()" class="w-full bg-blue-600 py-6 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-blue-500 shadow-2xl shadow-blue-600/30">初始化链路</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="depositModal" class="fixed inset-0 z-[3000] bg-black/95 hidden flex items-center justify-center p-6 backdrop-blur-xl">
-        <div class="glass max-w-md w-full p-10 rounded-[3.5rem] border-yellow-500/30">
-            <h2 class="text-3xl font-black mb-2 text-yellow-500 italic">RECHARGE</h2>
-            <p class="text-gray-500 text-[10px] mb-8 font-bold tracking-widest uppercase">USDT (TRC20) 资产注入</p>
-            <div class="bg-black/60 p-6 rounded-3xl mb-8 border border-white/5">
-                <p class="text-[9px] text-gray-500 font-black uppercase mb-3">官方唯一入金钱包地址</p>
-                <div class="text-xs break-all font-mono text-blue-400 select-all p-4 bg-blue-500/5 rounded-xl border border-blue-500/20">
-                    TFrankHansPolyClone2026SecureAddress
-                </div>
+    <div id="gateway" class="fixed inset-0 z-[5000] bg-black flex items-center justify-center p-6">
+        <div class="max-w-md w-full glass p-12 rounded-[4rem] border-blue-500/20 text-center">
+            <div class="mb-8">
+                <h1 class="text-5xl font-black italic tracking-tighter">POLYCLONE</h1>
+                <p class="text-blue-500 font-bold text-[9px] mt-2 tracking-[1em] uppercase">Supreme Terminal</p>
             </div>
             <div class="space-y-4">
-                <input id="depAmt" type="number" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none" placeholder="输入充值数量">
-                <button onclick="submitDeposit()" class="w-full btn-gold py-5 rounded-2xl font-black uppercase text-sm">提交区块验证申请</button>
-                <button onclick="toggleDeposit()" class="w-full text-gray-600 text-xs font-bold uppercase tracking-widest">返回</button>
+                <input id="uName" type="text" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl outline-none focus:border-blue-500 transition-all text-center font-bold" placeholder="ACCOUNT ID">
+                <input id="uPass" type="password" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl outline-none focus:border-blue-500 transition-all text-center font-bold" placeholder="ACCESS KEY">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 py-6 rounded-3xl font-black uppercase tracking-widest hover:scale-[1.02] transition shadow-2xl shadow-blue-600/20">Init Session</button>
             </div>
         </div>
     </div>
 
-    <div id="mainApp" class="hidden pt-12">
-        <nav class="p-8 flex justify-between items-center max-w-6xl mx-auto">
-            <div class="flex items-center gap-5">
-                <div class="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/40">
-                    <span class="text-2xl font-black italic">P</span>
-                </div>
+    <div id="mainApp" class="hidden pt-12 px-6">
+        <header class="max-w-6xl mx-auto py-10 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-6">
+                <div id="userAvatar" class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center text-3xl font-black italic shadow-2xl">P</div>
                 <div>
-                    <div id="userNameDisp" class="text-xl font-black tracking-tight">---</div>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] font-mono text-gray-500 uppercase font-black">Online / Secured</span>
+                    <div class="flex items-center gap-2">
+                        <span id="userNameDisp" class="text-3xl font-black italic">---</span>
+                        <span id="rankBadge" class="px-3 py-1 rounded-full text-[8px] font-black uppercase bg-blue-500/20 text-blue-400 border border-blue-500/30">Trader</span>
                     </div>
+                    <div class="hex-decor mt-1">0x74 0x68 0x65 0x20 0x66 0x6f 0x75 0x6e 0x64 0x65 0x72</div>
                 </div>
             </div>
+            
             <div class="flex gap-4">
-                <div class="glass px-6 py-3 rounded-2xl flex flex-col justify-center">
-                    <span class="text-[9px] text-gray-500 font-black uppercase">净资产</span>
-                    <span class="text-lg font-mono font-black text-green-400">$ <span id="userBal">0.00</span></span>
+                <div class="glass p-6 rounded-[2.5rem] min-w-[240px] relative overflow-hidden">
+                    <div class="text-[9px] text-gray-500 font-black uppercase mb-1">Available Liquidity</div>
+                    <div class="text-4xl font-mono font-black text-white">$ <span id="userBal">0.00</span></div>
+                    <div class="absolute bottom-0 right-0 w-24 h-1 bg-gradient-to-r from-transparent to-blue-500"></div>
                 </div>
-                <button onclick="toggleDeposit()" class="btn-gold px-8 py-3 rounded-2xl font-black text-xs uppercase">充值</button>
+                <button onclick="toggleDeposit()" class="bg-blue-600 hover:bg-blue-500 px-8 rounded-[2rem] font-black text-xs uppercase shadow-xl shadow-blue-600/30">Deposit</button>
             </div>
-        </nav>
+        </header>
 
-        <main class="max-w-6xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <aside id="adminPanel" class="hidden lg:col-span-1 space-y-8">
-                <div class="glass p-8 rounded-[3rem] border-purple-500/30 bg-gradient-to-b from-purple-900/10 to-transparent">
-                    <h2 class="text-purple-400 font-black text-xs uppercase tracking-[0.2em] mb-6">Founder Terminal</h2>
-                    <div class="mb-8">
-                        <span class="text-[10px] text-gray-500 font-bold block uppercase mb-1">累计待提现利润</span>
-                        <div id="vaultAmt" class="text-4xl font-black text-white">$ 0.00</div>
+        <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10 pb-20">
+            <aside id="adminPanel" class="hidden space-y-6">
+                <div class="glass p-8 rounded-[3.5rem] border-purple-500/30 bg-gradient-to-br from-purple-900/10 to-transparent">
+                    <h2 class="text-purple-400 font-black text-[10px] uppercase tracking-[0.4em] mb-8 italic">Master Control</h2>
+                    <div class="mb-10">
+                        <span class="text-[9px] text-gray-500 font-black uppercase">Unclaimed Fees</span>
+                        <div id="vaultAmt" class="text-4xl font-black text-white italic">$ 0.00</div>
                     </div>
-                    <button onclick="claimFees()" class="w-full bg-purple-600 py-4 rounded-2xl font-black text-xs uppercase mb-8 hover:bg-purple-500 transition shadow-xl shadow-purple-900/40">一键提取利润</button>
+                    <button onclick="claimFees()" class="w-full bg-purple-600 py-5 rounded-2xl font-black text-xs uppercase hover:bg-purple-500 transition mb-10 shadow-lg shadow-purple-900/40">Claim Profits</button>
                     
                     <div class="space-y-4">
-                        <p class="text-[10px] text-gray-500 font-black uppercase">快速发布市场题目</p>
-                        <textarea id="newMarketQ" class="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-sm h-24 outline-none focus:border-purple-500" placeholder="描述您的预测问题..."></textarea>
-                        <button onclick="createNewMarket()" class="w-full border border-purple-500/50 text-purple-400 py-4 rounded-2xl font-black text-xs hover:bg-purple-500/10 transition uppercase">确认发布到全网</button>
-                    </div>
-                </div>
-                
-                <div class="glass p-8 rounded-[3rem]">
-                    <h3 class="text-[10px] text-gray-500 font-black uppercase mb-4 tracking-widest">最近充值记录 (待审核)</h3>
-                    <div id="depList" class="space-y-3 text-[10px] font-mono">
-                        <div class="p-3 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center opacity-50">
-                            <span>#TXN-8821</span>
-                            <span class="text-yellow-500 font-bold">Checking...</span>
-                        </div>
+                        <input id="newMarketQ" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-xs outline-none focus:border-purple-500 transition" placeholder="Market Question...">
+                        <button onclick="createNewMarket()" class="w-full border border-purple-500/30 text-purple-400 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-purple-500/10 transition">Deploy To Network</button>
                     </div>
                 </div>
             </aside>
 
-            <section class="lg:col-span-2 space-y-10">
-                <h2 class="text-xs font-black text-blue-500 uppercase tracking-[0.5em] pl-4">Market Operations / 活跃市场</h2>
-                <div id="marketList" class="space-y-10"></div>
+            <section class="lg:col-span-2 space-y-12">
+                <div id="marketList"></div>
             </section>
         </main>
     </div>
 
+    <div id="depositModal" class="fixed inset-0 z-[6000] bg-black/95 hidden flex items-center justify-center p-6 backdrop-blur-2xl">
+        <div class="glass max-w-md w-full p-12 rounded-[4rem] border-blue-500/30 text-center">
+            <h2 class="text-3xl font-black text-white italic mb-4">RECHARGE</h2>
+            <p class="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-10">Inject USDT Assets</p>
+            <input id="depAmt" type="number" class="w-full bg-white/5 border border-white/10 p-6 rounded-3xl mb-6 text-center text-2xl font-black outline-none" placeholder="0.00">
+            <button onclick="submitDeposit()" class="w-full bg-blue-600 py-6 rounded-3xl font-black uppercase tracking-widest shadow-2xl">Confirm Injection</button>
+            <button onclick="toggleDeposit()" class="w-full text-gray-600 text-[10px] font-black mt-6 uppercase">Close</button>
+        </div>
+    </div>
+
 <script>
-// --- 核心驱动 ---
 const ADMIN_ID = "admin1991";
 const ADMIN_KEY = "Han183406@";
 
-let markets = JSON.parse(localStorage.getItem('v31_m')) || [
-    { id: 1, q: "2026年人类会登上火星吗？", pool: 25000, yesP: 0.32, history: [{time:1738368000,value:0.2},{time:1739059200,value:0.32}], active: true }
+let markets = JSON.parse(localStorage.getItem('v33_m')) || [
+    { id: 1, q: "2026年人类会登上火星吗？", pool: 20000, yesP: 0.28, history: [{time:1738368000,value:0.2},{time:1739059200,value:0.28}], active: true }
 ];
-let userPositions = JSON.parse(localStorage.getItem('v31_pos')) || {};
+let userPositions = JSON.parse(localStorage.getItem('v33_pos')) || {};
 
 function handleLogin() {
     const u = document.getElementById('uName').value.trim();
     const p = document.getElementById('uPass').value.trim();
-    if(u === ADMIN_ID && p !== ADMIN_KEY) return alert("ACCESS DENIED");
+    if(u === ADMIN_ID && p !== ADMIN_KEY) return alert("SECURE_AUTH: DENIED");
     if(u !== ADMIN_ID) {
-        const s = localStorage.getItem(`v31_k_${u}`);
-        if(s && s !== p) return alert("KEY ERROR");
-        if(!s) localStorage.setItem(`v31_k_${u}`, p);
+        const s = localStorage.getItem(`v33_k_${u}`);
+        if(s && s !== p) return alert("SECURE_AUTH: KEY_ERR");
+        if(!s) localStorage.setItem(`v33_k_${u}`, p);
     }
-    localStorage.setItem('v31_s', u);
-    if(!localStorage.getItem(`v31_b_${u}`)) localStorage.setItem(`v31_b_${u}`, "2000.00");
+    localStorage.setItem('v33_s', u);
+    if(!localStorage.getItem(`v33_b_${u}`)) localStorage.setItem(`v33_b_${u}`, "5000.00");
     renderApp();
 }
 
 function renderApp() {
-    const user = localStorage.getItem('v31_s');
+    const user = localStorage.getItem('v33_s');
     if(!user) return;
     document.getElementById('gateway').classList.add('hidden');
     document.getElementById('mainApp').classList.remove('hidden');
     document.getElementById('userNameDisp').innerText = user;
-    if(user === ADMIN_ID) document.getElementById('adminPanel').classList.remove('hidden');
+    
+    // 阶级森严：创始人光效
+    if(user === ADMIN_ID) {
+        document.getElementById('adminPanel').classList.remove('hidden');
+        document.getElementById('userAvatar').classList.add('founder-glow');
+        document.getElementById('rankBadge').innerText = "Founder";
+        document.getElementById('rankBadge').classList.add('founder-glow');
+    }
     updateUI();
+    startClock();
 }
 
 function updateUI() {
-    const user = localStorage.getItem('v31_s');
-    document.getElementById('userBal').innerText = parseFloat(localStorage.getItem(`v31_b_${user}`)).toFixed(2);
-    document.getElementById('vaultAmt').innerText = "$ " + parseFloat(localStorage.getItem('v31_f') || 0).toFixed(2);
+    const user = localStorage.getItem('v33_s');
+    const bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
+    document.getElementById('userBal').innerText = bal.toLocaleString(undefined, {minimumFractionDigits: 2});
+    document.getElementById('vaultAmt').innerText = "$ " + parseFloat(localStorage.getItem('v33_f') || 0).toFixed(2);
 
     const list = document.getElementById('marketList');
     list.innerHTML = markets.filter(m => m.active).map(m => {
@@ -170,31 +158,32 @@ function updateUI() {
         const noAmt = myPos.filter(p => p.side === 'NO').reduce((s, a) => s + a.amt, 0);
 
         return `
-            <div class="glass p-10 rounded-[4rem] border-white/5 hover:border-blue-500/20 transition-all duration-500 group">
+            <div class="glass p-10 rounded-[4rem] border-white/5 mb-10 hover:border-blue-500/20 transition-all group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-20 group-hover:opacity-100 transition"></div>
                 <div class="flex justify-between items-start mb-6">
-                    <h3 class="text-2xl font-black italic tracking-tight group-hover:text-blue-400 transition-colors">${m.q}</h3>
+                    <h3 class="text-2xl font-black italic tracking-tight">${m.q}</h3>
                     <div class="text-right">
                         <div class="text-4xl font-mono font-black text-blue-500">$ ${m.yesP.toFixed(2)}</div>
-                        <div class="text-[10px] text-gray-600 font-black uppercase mt-2">Liquidity: $ ${m.pool.toLocaleString()}</div>
+                        <div class="text-[9px] text-gray-600 font-black uppercase mt-1 tracking-widest">Global Pool: $ ${m.pool.toLocaleString()}</div>
                     </div>
                 </div>
                 
-                <div id="chart-${m.id}" class="chart-container"></div>
+                <div id="chart-${m.id}" class="chart-container h-48 bg-black/20 rounded-3xl mb-8"></div>
 
-                <div class="grid grid-cols-2 gap-6 my-8">
-                    <div class="bg-blue-900/5 p-6 rounded-3xl border border-blue-500/10">
-                        <span class="text-[9px] text-gray-500 font-black uppercase block mb-2 tracking-widest">YES 持仓份额</span>
+                <div class="grid grid-cols-2 gap-6 mb-8">
+                    <div class="bg-blue-500/5 p-6 rounded-3xl border border-blue-500/10">
+                        <div class="text-[9px] text-gray-500 font-black uppercase mb-2">My YES Position</div>
                         <div class="text-xl font-mono font-black ${yesAmt > 0 ? 'text-blue-400' : 'text-gray-800'}">$ ${yesAmt.toFixed(2)}</div>
                     </div>
-                    <div class="bg-red-900/5 p-6 rounded-3xl border border-red-500/10 text-right">
-                        <span class="text-[9px] text-gray-500 font-black uppercase block mb-2 tracking-widest">NO 持仓份额</span>
+                    <div class="bg-red-500/5 p-6 rounded-3xl border border-red-500/10 text-right">
+                        <div class="text-[9px] text-gray-500 font-black uppercase mb-2">My NO Position</div>
                         <div class="text-xl font-mono font-black ${noAmt > 0 ? 'text-red-400' : 'text-gray-800'}">$ ${noAmt.toFixed(2)}</div>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <button onclick="trade('${user}', ${m.id}, 'YES')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-blue-900/40 hover:scale-[1.02] transition">执行买入 YES</button>
-                    <button onclick="trade('${user}', ${m.id}, 'NO')" class="flex-1 bg-gray-900 border border-white/5 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] hover:bg-gray-800 transition">执行买入 NO</button>
+                    <button onclick="trade('${user}', ${m.id}, 'YES')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-xs shadow-2xl shadow-blue-900/40">Execute YES</button>
+                    <button onclick="trade('${user}', ${m.id}, 'NO')" class="flex-1 bg-gray-900 border border-white/10 py-5 rounded-[2rem] font-black uppercase text-xs">Execute NO</button>
                 </div>
             </div>
         `;
@@ -215,11 +204,12 @@ function updateUI() {
 }
 
 function trade(user, mid, side) {
-    const amtStr = prompt(`请输入注入 ${side} 的金额 (USDT):`, "500");
+    const amtStr = prompt(`Execution Amount (USDT):`, "250");
     const amt = parseFloat(amtStr);
     if(isNaN(amt) || amt <= 0) return;
-    let bal = parseFloat(localStorage.getItem(`v31_b_${user}`));
-    if(bal < amt) return alert("账户余额不足，请先完成资产充值。");
+    let bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
+    if(bal < amt) return alert("LIQUIDITY_ERR: INSUFFICIENT BALANCE");
+
     const m = markets.find(x => x.id === mid);
     const fee = amt * 0.01;
     const net = amt - fee;
@@ -227,28 +217,42 @@ function trade(user, mid, side) {
     m.yesP = (side === 'YES') ? Math.min(0.99, m.yesP + impact) : Math.max(0.01, m.yesP - impact);
     m.pool += net;
     m.history.push({ time: Math.floor(Date.now()/1000), value: m.yesP });
+    
     if(!userPositions[user]) userPositions[user] = [];
     userPositions[user].push({ mid, side, amt: net });
-    localStorage.setItem('v31_f', (parseFloat(localStorage.getItem('v31_f')||0) + fee).toFixed(2));
-    localStorage.setItem(`v31_b_${user}`, (bal - amt).toFixed(2));
-    localStorage.setItem('v31_m', JSON.stringify(markets));
-    localStorage.setItem('v31_pos', JSON.stringify(userPositions));
+    
+    localStorage.setItem('v33_f', (parseFloat(localStorage.getItem('v33_f')||0) + fee).toFixed(2));
+    localStorage.setItem(`v33_b_${user}`, (bal - amt).toFixed(2));
+    localStorage.setItem('v33_m', JSON.stringify(markets));
+    localStorage.setItem('v33_pos', JSON.stringify(userPositions));
+    
+    // 全网广播弹窗
+    showToast(user, amt, side, m.q);
     updateUI();
+}
+
+function showToast(user, amt, side, q) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast p-4 rounded-2xl shadow-2xl flex items-center gap-4 ${user === ADMIN_ID ? 'founder-glow' : ''}`;
+    toast.innerHTML = `
+        <div class="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center font-black text-xs">${user[0].toUpperCase()}</div>
+        <div class="flex-1">
+            <div class="text-[10px] font-black uppercase text-blue-400">${user} Just Executed</div>
+            <div class="text-[11px] font-bold text-white">$${amt} on ${side}</div>
+        </div>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
 }
 
 function toggleDeposit() { document.getElementById('depositModal').classList.toggle('hidden'); }
 function submitDeposit() {
     const amt = document.getElementById('depAmt').value;
-    if(!amt || amt <= 0) return alert("INVALID AMOUNT");
-    const user = localStorage.getItem('v31_s');
-    let bal = parseFloat(localStorage.getItem(`v31_b_${user}`));
-    localStorage.setItem(`v31_b_${user}`, (bal + parseFloat(amt)).toFixed(2));
-    // 增加一个模拟记录
-    const depList = document.getElementById('depList');
-    depList.innerHTML = `<div class="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20 flex justify-between items-center">
-        <span>$ ${amt}</span> <span class="text-green-500">SUCCESS</span>
-    </div>` + depList.innerHTML;
-    alert("资产充值请求已通过区块链验证。");
+    if(!amt || amt <= 0) return;
+    const user = localStorage.getItem('v33_s');
+    let bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
+    localStorage.setItem(`v33_b_${user}`, (bal + parseFloat(amt)).toFixed(2));
     toggleDeposit();
     updateUI();
 }
@@ -257,21 +261,22 @@ function createNewMarket() {
     const q = document.getElementById('newMarketQ').value.trim();
     if(!q) return;
     markets.push({ id: Date.now(), q, pool: 5000, yesP: 0.5, history: [{time: Math.floor(Date.now()/1000), value: 0.5}], active: true });
-    localStorage.setItem('v31_m', JSON.stringify(markets));
+    localStorage.setItem('v33_m', JSON.stringify(markets));
     document.getElementById('newMarketQ').value = "";
     updateUI();
 }
 
 function claimFees() {
-    const fees = parseFloat(localStorage.getItem('v31_f') || 0);
-    const user = localStorage.getItem('v31_s');
-    let bal = parseFloat(localStorage.getItem(`v31_b_${user}`));
-    localStorage.setItem(`v31_b_${user}`, (bal + fees).toFixed(2));
-    localStorage.setItem('v31_f', "0");
+    const fees = parseFloat(localStorage.getItem('v33_f') || 0);
+    const user = localStorage.getItem('v33_s');
+    let bal = parseFloat(localStorage.getItem(`v33_b_${user}`));
+    localStorage.setItem(`v33_b_${user}`, (bal + fees).toFixed(2));
+    localStorage.setItem('v33_f', "0");
     updateUI();
 }
 
-function logout() { localStorage.removeItem('v31_s'); location.reload(); }
+function startClock() { setInterval(() => { document.getElementById('liveClock').innerText = new Date().toUTCString().split(' ')[4] + " UTC"; }, 1000); }
+function logout() { localStorage.removeItem('v33_s'); location.reload(); }
 window.onload = renderApp;
 </script>
 </body>
