@@ -3,198 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PolyClone v2.6 - 众筹池与K线版</title>
+    <title>PolyClone v2.8 - 动态发布版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.umd.js"></script>
     <style>
         .gradient-bg { background: radial-gradient(circle at top right, #1e293b, #020617); }
         .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .chart-container { height: 220px; width: 100%; margin-top: 1rem; margin-bottom: 1rem; border-radius: 1rem; overflow: hidden; }
+        .chart-container { height: 220px; width: 100%; border-radius: 1rem; overflow: hidden; margin: 1rem 0; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen gradient-bg font-sans">
 
-<nav class="border-b border-gray-800 p-5 flex justify-between items-center bg-black/40 backdrop-blur-md sticky top-0 z-50">
-    <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black">P</div>
-        <span class="text-xl font-black italic tracking-tighter uppercase">PolyClone <span class="text-blue-500 text-[10px]">Chart v2.6</span></span>
-    </div>
-    <div class="flex items-center gap-4 text-xs font-mono">
-        Wallet: <span id="userBal" class="text-green-400 font-black">0.00</span> USDT
-    </div>
-</nav>
-
-<main class="max-w-4xl mx-auto p-6">
-    <section id="adminPanel" class="hidden mb-8 p-6 rounded-[2rem] border-2 border-purple-500/30 bg-purple-900/10">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="text-purple-400 font-black text-sm uppercase">创始人佣金</h2>
-                <div id="vaultAmt" class="text-3xl font-black text-white mt-1">0.00</div>
-            </div>
-            <button onclick="claimFees()" class="bg-purple-600 px-6 py-2 rounded-xl text-xs font-black hover:scale-105 transition">提现利润</button>
+<div id="gateway" class="fixed inset-0 z-[1000] bg-gray-950 flex items-center justify-center p-6">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black italic mb-2">POLYCLONE</h1>
+            <p class="text-blue-500 font-bold text-[10px] uppercase tracking-widest">Founder Access</p>
         </div>
-    </section>
+        <div class="glass p-8 rounded-[3rem]">
+            <div class="space-y-4">
+                <input id="uName" type="text" class="w-full bg-black/60 border border-gray-800 p-5 rounded-2xl outline-none focus:border-blue-500 transition" placeholder="账户名">
+                <input id="uPass" type="password" class="w-full bg-black/60 border border-gray-800 p-5 rounded-2xl outline-none focus:border-blue-500 transition" placeholder="进入密钥">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-blue-500 transition">解锁系统</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div id="marketList" class="space-y-8"></div>
-</main>
+<div id="mainApp" class="hidden">
+    <nav class="border-b border-gray-800 p-5 flex justify-between items-center bg-black/40 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black italic">P</div>
+            <span class="text-xl font-black italic tracking-tighter">POLYCLONE</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right">
+                <div id="roleLabel" class="text-[9px] font-black uppercase text-gray-500">Trader</div>
+                <div id="userName" class="text-sm font-bold">---</div>
+            </div>
+            <button onclick="logout()" class="text-xs font-bold text-red-500 bg-red-500/10 px-3 py-1 rounded-lg">退出</button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-6">
+        <section id="adminPanel" class="hidden mb-12 space-y-6">
+            <div class="p-6 rounded-[2rem] border-2 border-purple-500/30 bg-purple-900/10 flex justify-between items-center">
+                <div>
+                    <h2 class="text-purple-400 font-black text-sm uppercase">创始人佣金</h2>
+                    <div id="vaultAmt" class="text-3xl font-black text-white mt-1">0.00</div>
+                </div>
+                <button onclick="claimFees()" class="bg-purple-600 px-6 py-2 rounded-xl text-xs font-black uppercase">提现收益</button>
+            </div>
+
+            <div class="glass p-8 rounded-[2.5rem] border-purple-500/20">
+                <h3 class="text-purple-400 font-black text-xs uppercase mb-4 tracking-widest">发布新预测市场</h3>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input id="newMarketQ" type="text" class="flex-1 bg-black/40 border border-gray-800 p-4 rounded-xl outline-none focus:border-purple-500" placeholder="例如：2026年AI会取代程序员吗？">
+                    <button onclick="createNewMarket()" class="bg-purple-600 px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-purple-500 transition">立即发布</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="mb-6 flex justify-between items-center">
+            <h2 class="text-xs font-black text-gray-500 uppercase tracking-widest">活跃市场</h2>
+            <div class="bg-gray-900 px-4 py-2 rounded-xl border border-gray-800 text-xs font-mono">
+                Wallet: <span id="userBal" class="text-green-400 font-black">0.00</span> USDT
+            </div>
+        </div>
+
+        <div id="marketList" class="space-y-8"></div>
+    </main>
+</div>
 
 <script>
 const ADMIN_ID = "admin1991";
 const ADMIN_KEY = "Han183406@";
 
-// 初始数据结构，增加了 history 用于存储 K 线
-let markets = JSON.parse(localStorage.getItem('v26_markets')) || [
+let markets = JSON.parse(localStorage.getItem('v28_markets')) || [
     { 
-        id: 1, 
-        q: "2026年人类会登上火星吗？", 
-        pool: 5000, 
-        yesP: 0.28,
-        history: [
-            { time: '2026-01-01', value: 0.20 },
-            { time: '2026-01-15', value: 0.22 },
-            { time: '2026-02-01', value: 0.25 },
-            { time: '2026-02-09', value: 0.28 }
-        ]
-    },
-    { 
-        id: 2, 
-        q: "比特币价格突破 $150,000？", 
-        pool: 8000, 
-        yesP: 0.72,
-        history: [
-            { time: '2026-01-01', value: 0.60 },
-            { time: '2026-01-15', value: 0.65 },
-            { time: '2026-02-01', value: 0.70 },
-            { time: '2026-02-09', value: 0.72 }
-        ]
+        id: 1, q: "2026年人类会登上火星吗？", pool: 5000, yesP: 0.28,
+        history: [{ time: 1738368000, value: 0.20 }, { time: 1739059200, value: 0.28 }]
     }
 ];
 
-// 初始化登录
-function init() {
-    const user = localStorage.getItem('pc_session');
-    if(!user) {
-        const u = prompt("账户名:");
-        const p = prompt("密码:");
-        if(u === ADMIN_ID && p !== ADMIN_KEY) return alert("密码错误");
-        localStorage.setItem('pc_session', u);
-        localStorage.setItem(`v26_bal_${u}`, "5000.00");
-        location.reload();
+function handleLogin() {
+    const u = document.getElementById('uName').value.trim();
+    const p = document.getElementById('uPass').value.trim();
+    if(u === ADMIN_ID && p !== ADMIN_KEY) return alert("创始人密钥错误");
+    if(u !== ADMIN_ID) {
+        const s = localStorage.getItem(`v28_key_${u}`);
+        if(s && s !== p) return alert("密码错误");
+        if(!s) localStorage.setItem(`v28_key_${u}`, p);
     }
-    if(user === ADMIN_ID) document.getElementById('adminPanel').classList.remove('hidden');
-    renderUI();
+    localStorage.setItem('v28_session', u);
+    if(!localStorage.getItem(`v28_bal_${u}`)) localStorage.setItem(`v28_bal_${u}`, "5000.00");
+    renderApp();
 }
 
-function renderUI() {
-    const user = localStorage.getItem('pc_session');
-    const bal = localStorage.getItem(`v26_bal_${user}`) || "0";
-    const fees = localStorage.getItem('v26_fees') || "0";
+function renderApp() {
+    const user = localStorage.getItem('v28_session');
+    if(!user) return;
+    document.getElementById('gateway').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+    document.getElementById('userName').innerText = user;
+    if(user === ADMIN_ID) document.getElementById('adminPanel').classList.remove('hidden');
+    updateUI();
+}
 
-    document.getElementById('userBal').innerText = parseFloat(bal).toFixed(2);
-    if(user === ADMIN_ID) document.getElementById('vaultAmt').innerText = parseFloat(fees).toFixed(2) + " USDT";
+function updateUI() {
+    const user = localStorage.getItem('v28_session');
+    document.getElementById('userBal').innerText = parseFloat(localStorage.getItem(`v28_bal_${user}`)).toFixed(2);
+    document.getElementById('vaultAmt').innerText = parseFloat(localStorage.getItem('v28_fees') || 0).toFixed(2) + " USDT";
 
     const list = document.getElementById('marketList');
     list.innerHTML = markets.map(m => `
         <div class="glass p-8 rounded-[2.5rem] border border-gray-800">
-            <div class="flex flex-col md:flex-row justify-between gap-4 mb-2">
-                <h3 class="font-bold text-xl leading-tight">${m.q}</h3>
-                <div class="text-right">
-                    <span class="text-2xl font-mono font-black text-blue-400">$${m.yesP.toFixed(2)}</span>
-                    <div class="text-[10px] text-gray-500 font-bold uppercase">Pool: $${m.pool.toFixed(0)}</div>
-                </div>
+            <div class="flex justify-between items-start">
+                <h3 class="font-bold text-xl max-w-xs">${m.q}</h3>
+                <div class="text-right font-mono font-black text-blue-400 text-2xl">$${m.yesP.toFixed(2)}</div>
             </div>
-
             <div id="chart-${m.id}" class="chart-container"></div>
-
-            <div class="flex gap-4 mb-6">
-                <button onclick="trade('${user}', ${m.id}, 'YES')" class="flex-1 bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase transition shadow-lg shadow-blue-500/20">买 YES</button>
-                <button onclick="trade('${user}', ${m.id}, 'NO')" class="flex-1 bg-gray-800 hover:bg-gray-700 py-4 rounded-2xl font-black uppercase transition">买 NO</button>
-            </div>
-            
-            <div class="pt-6 border-t border-gray-800/50 flex items-center justify-between">
-                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">流动性注入 (LP模式)</span>
-                <button onclick="addLiquidity('${user}', ${m.id})" class="text-[10px] font-black text-green-500 hover:text-green-400 transition uppercase underline underline-offset-4">+ 注入资金</button>
+            <div class="flex gap-4">
+                <button onclick="trade('${user}', ${m.id}, 'YES')" class="flex-1 bg-blue-600 py-4 rounded-2xl font-black uppercase transition">买 YES</button>
+                <button onclick="trade('${user}', ${m.id}, 'NO')" class="flex-1 bg-gray-800 py-4 rounded-2xl font-black uppercase transition">买 NO</button>
             </div>
         </div>
     `).join('');
 
-    // 渲染 K 线图
-    markets.forEach(m => createChart(`chart-${m.id}`, m.history));
+    markets.forEach(m => {
+        const chart = LightweightCharts.createChart(document.getElementById(`chart-${m.id}`), {
+            layout: { background: { color: 'transparent' }, textColor: '#64748b' },
+            grid: { vertLines: { visible: false }, horzLines: { color: '#1e293b' } },
+            timeScale: { borderVisible: false }, rightPriceScale: { borderVisible: false },
+            handleScroll: false, handleScale: false
+        });
+        const series = chart.addAreaSeries({ lineColor: '#3b82f6', topColor: 'rgba(59, 130, 246, 0.4)', bottomColor: 'rgba(59, 130, 246, 0)', lineWidth: 3 });
+        series.setData(m.history);
+        chart.timeScale().fitContent();
+    });
 }
 
-function createChart(id, data) {
-    const chart = LightweightCharts.createChart(document.getElementById(id), {
-        layout: { background: { color: 'transparent' }, textColor: '#64748b' },
-        grid: { vertLines: { visible: false }, horzLines: { color: '#1e293b' } },
-        timeScale: { borderVisible: false },
-        rightPriceScale: { borderVisible: false },
-        handleScroll: false,
-        handleScale: false
-    });
-    const series = chart.addAreaSeries({
-        lineColor: '#3b82f6',
-        topColor: 'rgba(59, 130, 246, 0.4)',
-        bottomColor: 'rgba(59, 130, 246, 0.0)',
-        lineWidth: 3,
-    });
-    series.setData(data);
-    chart.timeScale().fitContent();
+// 核心：创始人发布新市场
+function createNewMarket() {
+    const q = document.getElementById('newMarketQ').value.trim();
+    if(!q) return alert("请输入预测问题");
+
+    const newMarket = {
+        id: Date.now(),
+        q: q,
+        pool: 5000,
+        yesP: 0.50, // 初始价格
+        history: [
+            { time: Math.floor(Date.now()/1000) - 86400, value: 0.50 },
+            { time: Math.floor(Date.now()/1000), value: 0.50 }
+        ]
+    };
+
+    markets.push(newMarket);
+    localStorage.setItem('v28_markets', JSON.stringify(markets));
+    document.getElementById('newMarketQ').value = "";
+    updateUI();
 }
 
 function trade(user, mid, side) {
-    const amt = prompt(`${side} 交易金额 (USDT):`, "100");
-    if(!amt || isNaN(amt) || amt <= 0) return;
-
-    let bal = parseFloat(localStorage.getItem(`v26_bal_${user}`));
-    if(bal < amt) return alert("余额不足");
-
+    const amt = prompt("投入金额:", "100");
+    if(!amt || isNaN(amt)) return;
+    let bal = parseFloat(localStorage.getItem(`v28_bal_${user}`));
     const m = markets.find(x => x.id === mid);
     const fee = amt * 0.01;
     const net = amt - fee;
-
-    // 更新手续费
-    const currentFees = parseFloat(localStorage.getItem('v26_fees') || 0);
-    localStorage.setItem('v26_fees', (currentFees + fee).toFixed(2));
-
-    // 价格联动及 K 线更新
-    const change = (net / m.pool) * 0.2;
+    
+    // 价格联动
+    const change = (net / m.pool) * 0.15;
     m.yesP = (side === 'YES') ? Math.min(0.99, m.yesP + change) : Math.max(0.01, m.yesP - change);
     m.pool += net;
+    m.history.push({ time: Math.floor(Date.now()/1000), value: m.yesP });
 
-    // 增加一个实时 K 线点
-    const now = new Date();
-    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${now.getHours()}:${now.getMinutes()}`;
-    m.history.push({ time: Date.now() / 1000, value: m.yesP });
-
-    localStorage.setItem(`v26_bal_${user}`, (bal - amt).toFixed(2));
-    localStorage.setItem('v26_markets', JSON.stringify(markets));
-    
-    renderUI();
+    localStorage.setItem('v28_fees', (parseFloat(localStorage.getItem('v28_fees')||0) + fee).toFixed(2));
+    localStorage.setItem(`v28_bal_${user}`, (bal - amt).toFixed(2));
+    localStorage.setItem('v28_markets', JSON.stringify(markets));
+    updateUI();
 }
 
-function addLiquidity(user, mid) {
-    const amt = prompt("作为 LP 注入金额:", "500");
-    if(!amt || isNaN(amt)) return;
-    let bal = parseFloat(localStorage.getItem(`v26_bal_${user}`));
-    const m = markets.find(x => x.id === mid);
-    m.pool += parseFloat(amt);
-    localStorage.setItem(`v26_bal_${user}`, (bal - amt).toFixed(2));
-    localStorage.setItem('v26_markets', JSON.stringify(markets));
-    renderUI();
-}
-
-function claimFees() {
-    const fees = localStorage.getItem('v26_fees') || "0";
-    const user = localStorage.getItem('pc_session');
-    let bal = parseFloat(localStorage.getItem(`v26_bal_${user}`));
-    localStorage.setItem(`v26_bal_${user}`, (bal + parseFloat(fees)).toFixed(2));
-    localStorage.setItem('v26_fees', "0");
-    alert("收割完成！");
-    location.reload();
-}
-
-init();
+function logout() { localStorage.removeItem('v28_session'); location.reload(); }
+window.onload = renderApp;
 </script>
 </body>
 </html>
